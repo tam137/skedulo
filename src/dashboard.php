@@ -1,0 +1,876 @@
+<?php
+require_once 'auth_helper.php';
+
+// Force authentication
+if (!check_remember_me()) {
+    header('Location: login.php');
+    exit;
+}
+
+try {
+    $pdo = get_db_connection();
+    // Fetch fresh user data to verify status
+    $stmt = $pdo->prepare("SELECT id, username, is_active, created_at, last_login_at FROM accounts WHERE id = :id");
+    $stmt->execute(['id' => $_SESSION['user_id']]);
+    $user = $stmt->fetch();
+
+    // If user is inactive or deleted, force logout
+    if (!$user || !$user['is_active']) {
+        header('Location: logout.php');
+        exit;
+    }
+} catch (Exception $e) {
+    error_log("Dashboard load error: " . $e->getMessage());
+    die("Systemfehler. Profil konnte nicht geladen werden.");
+}
+
+$first_char = strtoupper(substr($user['username'], 0, 1));
+?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminkalender</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+</head>
+<body>
+    <!-- Drawer Backdrop -->
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+
+    <!-- Sidebar Drawer (Account Details) -->
+    <div class="sidebar-drawer" id="sidebar-drawer">
+        <div class="user-profile" style="flex-direction: column; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+            <div class="avatar">
+                <?php echo htmlspecialchars($first_char); ?>
+            </div>
+            <div class="user-info" style="margin-top: 12px;">
+                <h2 style="font-size: 1.2rem; color: #ffffff;">Hallo, <?php echo htmlspecialchars($user['username']); ?>!</h2>
+                <div class="status-indicator" style="margin-top: 6px;">
+                    <span class="status-dot"></span>
+                    Konto aktiv
+                </div>
+            </div>
+        </div>
+        
+        <div class="meta-grid" style="grid-template-columns: 1fr; gap: 12px;">
+            <div class="meta-item" style="padding: 12px 16px;">
+                <div class="meta-item-label">ID (Primary Key)</div>
+                <div class="meta-item-value" style="font-size: 0.95rem;">#<?php echo htmlspecialchars($user['id']); ?></div>
+            </div>
+            <div class="meta-item" style="padding: 12px 16px;">
+                <div class="meta-item-label">Benutzername</div>
+                <div class="meta-item-value" style="font-size: 0.95rem;"><?php echo htmlspecialchars($user['username']); ?></div>
+            </div>
+            <div class="meta-item" style="padding: 12px 16px;">
+                <div class="meta-item-label">Registriert am</div>
+                <div class="meta-item-value" style="font-size: 0.95rem;">
+                    <?php echo date('d.m.Y H:i', strtotime($user['created_at'])); ?>
+                </div>
+            </div>
+            <div class="meta-item" style="padding: 12px 16px;">
+                <div class="meta-item-label">Letzter Login</div>
+                <div class="meta-item-value" style="font-size: 0.95rem;">
+                    <?php 
+                    if ($user['last_login_at']) {
+                        echo date('d.m.Y H:i', strtotime($user['last_login_at']));
+                    } else {
+                        echo 'Jetzt';
+                    }
+                    ?>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: auto; padding-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+            <button id="change-pwd-btn" class="change-pwd-btn" style="width: 100%; justify-content: center; box-sizing: border-box;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Passwort ändern
+            </button>
+            <a href="logout.php" class="logout-btn" style="text-decoration: none; display: flex; width: 100%; justify-content: center; box-sizing: border-box;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Abmelden
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="logo-icon" style="width: 40px; height: 40px; margin-bottom: 0; border-radius: 12px; box-shadow: none;">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+                <h1 style="font-size: 1.4rem;">Kalender</h1>
+            </div>
+            
+            <!-- Hamburger Button -->
+            <button class="hamburger-btn" id="hamburger-btn" aria-label="Menü öffnen">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px;">
+                <h2 style="font-size: 1.5rem; font-weight: 600; color: #ffffff;">Terminkalender</h2>
+                <button class="add-btn" id="add-appointment-btn">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Neuer Termin
+                </button>
+            </div>
+
+            <!-- Upcoming Appointments -->
+            <div class="table-container">
+                <table class="appointments-table" id="upcoming-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Name</th>
+                            <th>Ort</th>
+                            <th>Notizen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="upcoming-tbody">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 30px;">
+                                Lade Termine...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Past Appointments (Accordion) -->
+            <div class="past-appointments-section">
+                <details class="past-appointments-details">
+                    <summary class="past-appointments-summary">Vergangene Termine</summary>
+                    <div class="past-appointments-content">
+                        <div class="table-container" style="border: none; border-radius: 0; margin-bottom: 0;">
+                            <table class="appointments-table" id="past-table">
+                                <thead>
+                                    <tr>
+                                        <th>Datum</th>
+                                        <th>Name</th>
+                                        <th>Ort</th>
+                                        <th>Notizen</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="past-tbody">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 30px;">
+                                            Keine vergangenen Termine vorhanden.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Modal (Create / Edit) -->
+    <div class="modal-overlay" id="appointment-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Termin erstellen</h3>
+                <button class="close-btn" id="close-modal-btn">&times;</button>
+            </div>
+            <form id="appointment-form">
+                <input type="hidden" id="appointment-id" name="id" value="">
+                
+                <div class="form-group">
+                    <label for="title" class="form-label">Name des Termins</label>
+                    <input type="text" id="title" name="title" class="form-input" required style="padding-left: 16px;">
+                </div>
+
+                <div class="form-group">
+                    <label for="appointment_date" class="form-label">Datum</label>
+                    <input type="date" id="appointment_date" name="appointment_date" class="form-input" required style="padding-left: 16px;">
+                </div>
+
+                <div class="form-group">
+                    <label for="location" class="form-label">Ort</label>
+                    <input type="text" id="location" name="location" class="form-input" style="padding-left: 16px;">
+                </div>
+
+                <div class="form-group">
+                    <label for="notes" class="form-label">Notizen</label>
+                    <textarea id="notes" name="notes" class="form-input" style="padding-left: 16px; min-height: 80px; resize: vertical; padding-top: 10px;"></textarea>
+                </div>
+
+                <!-- Edit History Section (Collapsible, hidden for new creations) -->
+                <div class="history-section" id="modal-history-section" style="display: none;">
+                    <details class="history-details" id="history-details">
+                        <summary class="history-summary">Änderungshistorie</summary>
+                        <div class="history-content" id="history-content">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </details>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-delete" id="delete-btn" style="display: none;">Löschen</button>
+                    <div style="display: flex; gap: 12px; margin-left: auto;">
+                        <button type="button" class="btn-cancel" id="cancel-modal-btn">Abbrechen</button>
+                        <button type="submit" class="btn-save" id="save-btn">Speichern</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Delete Confirmation Overlay -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-card">
+            <h3>Termin löschen?</h3>
+            <p>Bist du sicher, dass du diesen Termin dauerhaft löschen möchtest?</p>
+            <div class="confirm-actions">
+                <button class="btn-confirm-cancel" id="confirm-cancel-btn">Abbrechen</button>
+                <button class="btn-confirm-delete" id="confirm-delete-btn">Ja, löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="change-password-modal">
+        <div class="modal-card" style="max-width: 440px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Passwort ändern</h3>
+                <button class="close-btn" id="close-pwd-modal-btn">&times;</button>
+            </div>
+            
+            <div class="alert alert-danger" id="pwd-error-alert" style="display: none; margin-bottom: 16px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span id="pwd-error-message"></span>
+            </div>
+
+            <div class="alert alert-success" id="pwd-success-alert" style="display: none; margin-bottom: 16px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>Passwort erfolgreich geändert! Du wirst jetzt abgemeldet...</span>
+            </div>
+
+            <form id="change-password-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="current-password" class="form-label">Aktuelles Passwort</label>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <input type="password" id="current-password" name="current_password" class="form-input" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="new-password" class="form-label">Neues Passwort</label>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <input type="password" id="new-password" name="new_password" class="form-input" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="confirm-password" class="form-label">Passwort verifizieren</label>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <input type="password" id="confirm-password" name="confirm_password" class="form-input" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div class="pwd-requirements">
+                    <div id="req-length" class="req-item">
+                        <span class="req-dot"></span>
+                        Mindestens 9 Zeichen
+                    </div>
+                    <div id="req-lowercase" class="req-item">
+                        <span class="req-dot"></span>
+                        Mindestens ein Kleinbuchstabe (a-z)
+                    </div>
+                    <div id="req-uppercase" class="req-item">
+                        <span class="req-dot"></span>
+                        Mindestens ein Großbuchstabe (A-Z)
+                    </div>
+                    <div id="req-number" class="req-item">
+                        <span class="req-dot"></span>
+                        Mindestens eine Zahl (0-9)
+                    </div>
+                    <div id="req-match" class="req-item">
+                        <span class="req-dot"></span>
+                        Passwörter stimmen überein
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="margin-top: 0; padding-top: 16px;">
+                    <button type="button" class="btn-cancel" id="cancel-pwd-modal-btn">Abbrechen</button>
+                    <button type="submit" class="btn-save" id="save-pwd-btn" disabled style="opacity: 0.5; cursor: not-allowed;">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Flatpickr Library -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/de.js"></script>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sidebar Elements
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebarDrawer = document.getElementById('sidebar-drawer');
+            const drawerBackdrop = document.getElementById('drawer-backdrop');
+
+            // Modal & Overlay Elements
+            const appointmentModal = document.getElementById('appointment-modal');
+            const confirmOverlay = document.getElementById('confirm-overlay');
+            const appointmentForm = document.getElementById('appointment-form');
+            const modalTitle = document.getElementById('modal-title');
+            
+            // Form Fields
+            const appointmentIdInput = document.getElementById('appointment-id');
+            const titleInput = document.getElementById('title');
+            const dateInput = document.getElementById('appointment_date');
+            const locationInput = document.getElementById('location');
+            const notesInput = document.getElementById('notes');
+            
+            // Buttons
+            const addBtn = document.getElementById('add-appointment-btn');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const cancelModalBtn = document.getElementById('cancel-modal-btn');
+            const deleteBtn = document.getElementById('delete-btn');
+            const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+            const historySection = document.getElementById('modal-history-section');
+            const historyContent = document.getElementById('history-content');
+            const historyDetails = document.getElementById('history-details');
+
+            // Change Password Elements
+            const changePwdBtn = document.getElementById('change-pwd-btn');
+            const changePwdModal = document.getElementById('change-password-modal');
+            const closePwdModalBtn = document.getElementById('close-pwd-modal-btn');
+            const cancelPwdModalBtn = document.getElementById('cancel-pwd-modal-btn');
+            const changePwdForm = document.getElementById('change-password-form');
+            const currentPwdInput = document.getElementById('current-password');
+            const newPwdInput = document.getElementById('new-password');
+            const confirmPwdInput = document.getElementById('confirm-password');
+            const reqLength = document.getElementById('req-length');
+            const reqLowercase = document.getElementById('req-lowercase');
+            const reqUppercase = document.getElementById('req-uppercase');
+            const reqNumber = document.getElementById('req-number');
+            const reqMatch = document.getElementById('req-match');
+            const savePwdBtn = document.getElementById('save-pwd-btn');
+            const pwdErrorAlert = document.getElementById('pwd-error-alert');
+            const pwdErrorMessage = document.getElementById('pwd-error-message');
+            const pwdSuccessAlert = document.getElementById('pwd-success-alert');
+
+            // Initialize Flatpickr datepicker
+            const fp = flatpickr(dateInput, {
+                locale: "de",
+                altInput: true,
+                altFormat: "d.m.Y",
+                dateFormat: "Y-m-d",
+                disableMobile: true
+            });
+
+            let currentDeleteId = null;
+
+            // --- Toggle Sidebar ---
+            function openSidebar() {
+                hamburgerBtn.classList.add('active');
+                sidebarDrawer.classList.add('active');
+                drawerBackdrop.classList.add('active');
+            }
+
+            function closeSidebar() {
+                hamburgerBtn.classList.remove('active');
+                sidebarDrawer.classList.remove('active');
+                drawerBackdrop.classList.remove('active');
+            }
+
+            hamburgerBtn.addEventListener('click', () => {
+                if (sidebarDrawer.classList.contains('active')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+
+            drawerBackdrop.addEventListener('click', closeSidebar);
+
+            // --- Change Password Modal Functions ---
+            function openPwdModal() {
+                closeSidebar();
+                changePwdForm.reset();
+                pwdErrorAlert.style.display = 'none';
+                pwdSuccessAlert.style.display = 'none';
+                changePwdForm.style.display = 'block';
+                validatePassword();
+                changePwdModal.classList.add('active');
+            }
+
+            function closePwdModal() {
+                changePwdModal.classList.remove('active');
+                changePwdForm.reset();
+            }
+
+            function validatePassword() {
+                const pwd = newPwdInput.value;
+                const confirmPwd = confirmPwdInput.value;
+
+                const isLengthValid = pwd.length >= 9;
+                const isLowercaseValid = /[a-z]/.test(pwd);
+                const isUppercaseValid = /[A-Z]/.test(pwd);
+                const isNumberValid = /\d/.test(pwd);
+                const isMatchValid = pwd !== '' && pwd === confirmPwd;
+
+                function updateReqUI(element, isValid) {
+                    const dot = element.querySelector('.req-dot');
+                    if (isValid) {
+                        element.style.color = 'var(--success)';
+                        if (dot) {
+                            dot.style.backgroundColor = 'var(--success)';
+                            dot.style.boxShadow = '0 0 6px var(--success)';
+                        }
+                    } else {
+                        element.style.color = 'var(--text-secondary)';
+                        if (dot) {
+                            dot.style.backgroundColor = 'var(--text-secondary)';
+                            dot.style.boxShadow = 'none';
+                        }
+                    }
+                }
+
+                updateReqUI(reqLength, isLengthValid);
+                updateReqUI(reqLowercase, isLowercaseValid);
+                updateReqUI(reqUppercase, isUppercaseValid);
+                updateReqUI(reqNumber, isNumberValid);
+                updateReqUI(reqMatch, isMatchValid);
+
+                const allValid = isLengthValid && isLowercaseValid && isUppercaseValid && isNumberValid && isMatchValid;
+                savePwdBtn.disabled = !allValid;
+                savePwdBtn.style.opacity = allValid ? '1' : '0.5';
+                savePwdBtn.style.cursor = allValid ? 'pointer' : 'not-allowed';
+            }
+
+            changePwdBtn.addEventListener('click', openPwdModal);
+            closePwdModalBtn.addEventListener('click', closePwdModal);
+            cancelPwdModalBtn.addEventListener('click', closePwdModal);
+            newPwdInput.addEventListener('input', validatePassword);
+            confirmPwdInput.addEventListener('input', validatePassword);
+
+            // --- AJAX: Load & Render Appointments ---
+            function loadAppointments() {
+                fetch('appointments_api.php?action=list')
+                    .then(response => {
+                        if (response.status === 401) {
+                            window.location.href = 'login.php';
+                            return;
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data || !data.success) {
+                            alert(data?.error || 'Fehler beim Laden der Termine.');
+                            return;
+                        }
+                        renderTable(data.upcoming, 'upcoming-tbody', 'Lade Termine...', 'Keine anstehenden Termine vorhanden.');
+                        renderTable(data.past, 'past-tbody', 'Lade Termine...', 'Keine vergangenen Termine vorhanden.');
+                    })
+                    .catch(err => {
+                        console.error('Error loading appointments:', err);
+                    });
+            }
+
+            function renderTable(appointments, tbodyId, loadingText, emptyText) {
+                const tbody = document.getElementById(tbodyId);
+                tbody.innerHTML = '';
+
+                if (appointments.length === 0) {
+                    tbody.innerHTML = `<tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 30px;">
+                            ${emptyText}
+                        </td>
+                    </tr>`;
+                    return;
+                }
+
+                appointments.forEach(apt => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.id = apt.id;
+                    
+                    const dateHtml = formatAppointmentDate(apt.appointment_date);
+                    const titleEscaped = escapeHtml(apt.title);
+                    const locationEscaped = escapeHtml(apt.location || '-');
+                    const notesEscaped = escapeHtml(apt.notes || '-');
+
+                    tr.innerHTML = `
+                        <td class="cell-date" data-label="Datum">${dateHtml}</td>
+                        <td class="cell-title" data-label="Name">${titleEscaped}</td>
+                        <td data-label="Ort">${locationEscaped}</td>
+                        <td data-label="Notizen" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${notesEscaped}</td>
+                    `;
+
+                    tr.addEventListener('click', () => openEditModal(apt.id));
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // Helpers for formatting
+            function formatAppointmentDate(dateString) {
+                const d = new Date(dateString.replace(' ', 'T'));
+                if (isNaN(d.getTime())) return escapeHtml(dateString);
+                
+                const weekday = d.toLocaleDateString('de-DE', { weekday: 'short' });
+                const dateStr = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                
+                return `<span class="weekday-tag">${weekday}</span>${dateStr}`;
+            }
+
+            function formatDateOnly(dateString) {
+                if (!dateString) return '';
+                const d = new Date(dateString.replace(' ', 'T'));
+                if (isNaN(d.getTime())) return dateString;
+                return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            }
+
+            function formatDateSimple(dateString) {
+                if (!dateString) return '';
+                const d = new Date(dateString.replace(' ', 'T'));
+                if (isNaN(d.getTime())) return dateString;
+                const dateStr = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const timeStr = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                return `${dateStr} um ${timeStr} Uhr`;
+            }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            // --- Form Helpers ---
+            function openCreateModal() {
+                appointmentForm.reset();
+                appointmentIdInput.value = '';
+                modalTitle.textContent = 'Termin erstellen';
+                deleteBtn.style.display = 'none';
+                historySection.style.display = 'none';
+                historyContent.innerHTML = '';
+                
+                // Pre-fill date to today (Berlin local)
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                fp.setDate(`${yyyy}-${mm}-${dd}`);
+
+                appointmentModal.classList.add('active');
+            }
+
+            function openEditModal(id) {
+                fetch(`appointments_api.php?action=get&id=${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data || !data.success) {
+                            alert(data?.error || 'Fehler beim Laden des Termins.');
+                            return;
+                        }
+
+                        const apt = data.appointment;
+                        appointmentIdInput.value = apt.id;
+                        titleInput.value = apt.title;
+                        locationInput.value = apt.location || '';
+                        notesInput.value = apt.notes || '';
+
+                        // Format timestamp to datetime-local
+                        const d = new Date(apt.appointment_date.replace(' ', 'T'));
+                        const yyyy = d.getFullYear();
+                        const mm = String(d.getMonth() + 1).padStart(2, '0');
+                        const dd = String(d.getDate()).padStart(2, '0');
+                        fp.setDate(`${yyyy}-${mm}-${dd}`);
+
+                        // Build history items array
+                        const historyItems = [];
+                        if (data.history && data.history.length > 0) {
+                            data.history.forEach(log => {
+                                historyItems.push(log);
+                            });
+                        }
+                        
+                        // Push virtual creation log at the bottom of the list
+                        historyItems.push({
+                            changed_at: apt.created_at,
+                            changer_name: apt.creator_name,
+                            is_creation: true
+                        });
+
+                        // History render
+                        historyContent.innerHTML = '';
+                        historySection.style.display = 'block';
+                        historyDetails.removeAttribute('open'); // Collapsed by default
+                        
+                        historyItems.forEach(log => {
+                            const item = document.createElement('div');
+                            item.className = 'history-item';
+                            
+                            const timeStr = formatDateSimple(log.changed_at);
+                            const userStr = escapeHtml(log.changer_name);
+                            
+                            let changesHtml = '';
+                            if (log.is_creation) {
+                                changesHtml = `<div class="history-change-line" style="color: var(--accent-blue); font-weight: 500;">Termin erstellt</div>`;
+                            } else {
+                                changesHtml = formatChanges(log.changes);
+                            }
+
+                            item.innerHTML = `
+                                <div class="history-meta">
+                                    <span>${timeStr}</span>
+                                    <span>von <strong>${userStr}</strong></span>
+                                </div>
+                                <div class="history-changes">
+                                    ${changesHtml}
+                                </div>
+                            `;
+                            historyContent.appendChild(item);
+                        });
+
+                        modalTitle.textContent = 'Termin bearbeiten';
+                        deleteBtn.style.display = 'block';
+                        appointmentModal.classList.add('active');
+                    })
+                    .catch(err => {
+                        console.error('Error fetching appointment details:', err);
+                        alert('Systemfehler beim Abrufen der Details.');
+                    });
+            }
+
+            function formatChanges(changes) {
+                const labels = {
+                    title: 'Name',
+                    location: 'Ort',
+                    appointment_date: 'Datum',
+                    notes: 'Notizen'
+                };
+                let html = '';
+                for (const field in changes) {
+                    const fieldLabel = labels[field] || field;
+                    let oldVal = changes[field]['old'] || 'Keine';
+                    let newVal = changes[field]['new'] || 'Keine';
+                    
+                    if (field === 'appointment_date') {
+                        oldVal = formatDateOnly(oldVal);
+                        newVal = formatDateOnly(newVal);
+                    }
+                    
+                    html += `<div class="history-change-line">
+                        <strong>${fieldLabel}:</strong> 
+                        <span style="text-decoration: line-through; opacity: 0.6;">${escapeHtml(oldVal)}</span> 
+                        <span class="change-arrow">➔</span> 
+                        <span style="color: var(--success); font-weight: 500;">${escapeHtml(newVal)}</span>
+                    </div>`;
+                }
+                return html;
+            }
+
+            function closeModal() {
+                appointmentModal.classList.remove('active');
+                appointmentForm.reset();
+            }
+
+            // --- Delete Confirmation Overlay toggles ---
+            function showConfirmOverlay(id) {
+                currentDeleteId = id;
+                confirmOverlay.classList.add('active');
+            }
+
+            function hideConfirmOverlay() {
+                currentDeleteId = null;
+                confirmOverlay.classList.remove('active');
+            }
+
+            // Event Listeners for UI
+            addBtn.addEventListener('click', openCreateModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelModalBtn.addEventListener('click', closeModal);
+            
+            deleteBtn.addEventListener('click', () => {
+                const id = appointmentIdInput.value;
+                if (id) {
+                    showConfirmOverlay(id);
+                }
+            });
+
+            confirmCancelBtn.addEventListener('click', hideConfirmOverlay);
+
+            // Close modal on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    hideConfirmOverlay();
+                    closeSidebar();
+                    closePwdModal();
+                }
+            });
+
+            // --- Submit Form (Create / Update) ---
+            appointmentForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = appointmentIdInput.value;
+                const isEdit = id !== '';
+                const payload = {
+                    action: isEdit ? 'update' : 'create',
+                    id: isEdit ? intval(id) : null,
+                    title: titleInput.value,
+                    appointment_date: dateInput.value,
+                    location: locationInput.value,
+                    notes: notesInput.value
+                };
+
+                function intval(val) {
+                    const parsed = parseInt(val, 10);
+                    return isNaN(parsed) ? 0 : parsed;
+                }
+
+                fetch('appointments_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.success) {
+                        closeModal();
+                        loadAppointments();
+                    } else {
+                        alert(data?.error || 'Fehler beim Speichern des Termins.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error saving appointment:', err);
+                    alert('Systemfehler beim Speichern.');
+                });
+            });
+
+            // --- Confirm Delete Action ---
+            confirmDeleteBtn.addEventListener('click', () => {
+                if (!currentDeleteId) return;
+
+                fetch('appointments_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'delete',
+                        id: parseInt(currentDeleteId, 10)
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.success) {
+                        hideConfirmOverlay();
+                        closeModal();
+                        loadAppointments();
+                    } else {
+                        alert(data?.error || 'Fehler beim Löschen des Termins.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error deleting appointment:', err);
+                    alert('Systemfehler beim Löschen.');
+                });
+            });
+
+            // --- Submit Password Change ---
+            changePwdForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const payload = {
+                    current_password: currentPwdInput.value,
+                    new_password: newPwdInput.value,
+                    confirm_password: confirmPwdInput.value
+                };
+
+                fetch('change_password_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => {
+                    return response.json().then(data => ({
+                        ok: response.ok,
+                        data: data
+                    }));
+                })
+                .then(({ ok, data }) => {
+                    if (ok && data && data.success) {
+                        pwdErrorAlert.style.display = 'none';
+                        pwdSuccessAlert.style.display = 'flex';
+                        changePwdForm.style.display = 'none';
+                        
+                        // Redirect after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = 'login.php?password_changed=1';
+                        }, 2000);
+                    } else {
+                        pwdErrorMessage.textContent = data?.error || 'Fehler beim Ändern des Passworts.';
+                        pwdErrorAlert.style.display = 'flex';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error changing password:', err);
+                    pwdErrorMessage.textContent = 'Systemfehler beim Speichern des Passworts.';
+                    pwdErrorAlert.style.display = 'flex';
+                });
+            });
+
+            // Initial load of table data
+            loadAppointments();
+        });
+    </script>
+</body>
+</html>
+

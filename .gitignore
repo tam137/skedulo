@@ -1,0 +1,35 @@
+# Credentials and sensitive information
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
+*.key
+*.pem
+*.cert
+credentials.json
+client_secret.json
+
+# Local configurations / IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*~
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Temp / Log Files
+*.log
+tmp/
+temp/
+
+# Symlinks and ignored directories
+agent-workflow
+deploy.sh
