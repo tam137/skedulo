@@ -5,10 +5,14 @@ Diese Datei dient als zentraler Einstiegspunkt für zukünftige KI-Agenten, die 
 > [!IMPORTANT]
 > **Pflegepflicht für Agenten:** Jeder Agent, der Änderungen am Server oder an den Konfigurationen vornimmt, **muss** diese Datei (`AGENTS.md`) und die zugehörigen Dokumente/Skripte im Ordner `agent-workflow/` aktuell halten. Das Ziel ist eine effiziente und fehlerfreie Zusammenarbeit über verschiedene Agenten-Sitzungen hinweg.
 >
-> **Verpflichtender Implementierungsplan (Planning Mode):** Jede Änderung am Code, an der Datenbank oder an der Konfiguration – unabhängig davon, wie klein sie ist – **muss zwingend** vor der Durchführung in einem detaillierten Implementierungsplan (`implementation_plan.md`) dokumentiert und vom Benutzer explizit freigegeben werden.
->
-> **Automatisches Committen und Pushen:** Jede vorgenommene Änderung (Code, Konfiguration, Dokumentation) **muss selbstständig** per Git committet und auf das Remote-Repository gepusht werden. Die Commit-Nachricht (Commit Message) soll kurz und knapp und auf **Englisch** verfasst sein.
-> * **Sicherheitsausschluss:** Es dürfen **keine absoluten Pfade** (wie lokale Entwicklungsordner `/home/<user>/...`) oder **sensible Informationen** (wie API-Keys, Passwörter) in Git eingecheckt werden. Links in der Dokumentation müssen stets relativ sein. Sensible Dateien müssen in die `.gitignore` aufgenommen werden. Bei Unsicherheit vor dem Commit den Benutzer fragen!
+> **Ablauf für Änderungen (Zwingend einzuhalten):**
+> 
+> 1. **Erstelle einen Implementierungsplan:** Dokumentiere jede geplante Änderung am Code, an der Datenbank oder an der Konfiguration im Detail in `implementation_plan.md`. Hole vor der Durchführung die explizite Freigabe des Benutzers ein.
+> 2. **Führe die Änderungen durch:** Implementiere den freigegebenen Code und verifiziere die Anpassungen.
+> 3. **Committe und pushe die Änderungen:** Führe nach erfolgreichem Test einen Git-Commit durch und pushe diesen auf das Remote-Repository. Verfasse die Commit-Nachricht kurz, knapp und auf Englisch.
+>    * *Achtung (Sicherheitsausschluss):* Checke **keine absoluten Pfade** (wie lokale Entwicklungsordner) oder **sensible Informationen** (API-Keys, Passwörter) ein. Verwende ausschließlich relative Pfade.
+> 4. **Führe das Live-Deployment durch:** Übertrage die Änderungen zwingend auf den Live-Server. Befolge dazu die Anweisungen im Deployment-Workflow:
+>    * 👉 **[Siehe Workflow: apache-php-deploy](agent-workflow/apache-php-deploy.md)**
 
 
 > [!CAUTION]
@@ -52,5 +56,5 @@ Die detaillierten Implementierungsschritte, der standardisierte PHP-Codeblock so
 
 ---
 
-*Letzte Aktualisierung: 2026-06-23 von Antigravity-Agent (Sensible Server-Daten in agent-workflow/ ausgelagert, Open-Source-Bereitschaft vorbereitet).*
+*Letzte Aktualisierung: 2026-06-24 von Antigravity-Agent (Ablauf in AGENTS.md strukturiert und Live-Deployment als Schritt hinzugefügt).*
 
