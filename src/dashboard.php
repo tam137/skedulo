@@ -245,10 +245,13 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                         <button type="button" class="emoji-btn btn-none" data-emoji="" title="Kein Symbol">🚫</button>
                         <button type="button" class="emoji-btn" data-emoji="❤️" title="Herz">❤️</button>
                         <button type="button" class="emoji-btn" data-emoji="🏃‍♀️" title="Sportlerin">🏃‍♀️</button>
-                        <button type="button" class="emoji-btn" data-emoji="💃🕺" title="Tanzpaar">💃🕺</button>
+                        <button type="button" class="emoji-btn" data-emoji="💃" title="Tanzende Person">💃</button>
                         <button type="button" class="emoji-btn" data-emoji="🌴" title="Urlaubspalme">🌴</button>
                         <button type="button" class="emoji-btn" data-emoji="💻" title="Arbeitslaptop">💻</button>
-                        <button type="button" class="emoji-btn" data-emoji="🧑‍⚕️" title="Doctor">🧑‍⚕️</button>
+                        <button type="button" class="emoji-btn" data-emoji="🩺" title="Stethoskop">🩺</button>
+                        <button type="button" class="emoji-btn" data-emoji="🐱" title="Katze">🐱</button>
+                        <button type="button" class="emoji-btn" data-emoji="🏠" title="Familie/Zuhause">🏠</button>
+                        <button type="button" class="emoji-btn" data-emoji="🧑‍🤝‍🧑" title="Freunde">🧑‍🤝‍🧑</button>
                     </div>
                 </div>
 
