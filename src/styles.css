@@ -950,7 +950,7 @@ h1 {
 
     .appointments-table tbody tr {
         border-bottom: 1px solid var(--border-color);
-        padding: 16px 0;
+        padding: 16px 20px;
         position: relative;
     }
     
