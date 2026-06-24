@@ -70,6 +70,17 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
             </div>
         </div>
 
+        <div class="nav-menu" style="margin-top: 24px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px;">
+            <a href="#" class="nav-link active" id="nav-calendar" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; color: var(--text-primary); text-decoration: none; font-weight: 500; background: var(--bg-hover);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Kalender
+            </a>
+            <a href="#" class="nav-link" id="nav-files" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-weight: 500;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                Dateiverwaltung
+            </a>
+        </div>
+
         <div style="margin-top: auto; padding-top: 20px; display: flex; flex-direction: column; gap: 12px;">
             <button id="change-pwd-btn" class="change-pwd-btn" style="width: 100%; justify-content: center; box-sizing: border-box;">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -99,7 +110,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
                 </div>
-                <h1 style="font-size: 1.4rem;">Kalender</h1>
+                <h1 style="font-size: 1.4rem;" id="main-title">Kalender</h1>
             </div>
             
             <!-- Hamburger Button -->
@@ -111,7 +122,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
         </div>
 
         <!-- Dashboard Content -->
-        <div class="dashboard-card">
+        <div id="calendar-view" class="dashboard-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px;">
                 <h2 style="font-size: 1.5rem; font-weight: 600; color: #ffffff;">Terminkalender</h2>
                 <button class="add-btn" id="add-appointment-btn">
@@ -172,6 +183,44 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 </details>
             </div>
         </div>
+
+        <!-- Files Content -->
+        <div id="files-view" class="dashboard-card" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px;">
+                <h2 style="font-size: 1.5rem; font-weight: 600; color: #ffffff;">Alle Dateien</h2>
+                <div>
+                    <input type="file" id="global-file-input" style="display: none;">
+                    <button class="add-btn" id="upload-global-file-btn">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Datei hochladen
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="appointments-table" id="files-table">
+                    <thead>
+                        <tr>
+                            <th>Dateiname</th>
+                            <th>Termin</th>
+                            <th>Größe</th>
+                            <th>Hochgeladen von</th>
+                            <th>Datum</th>
+                            <th style="text-align: right;">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="files-tbody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 30px;">
+                                Lade Dateien...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Appointment Modal (Create / Edit) -->
@@ -212,6 +261,22 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 <div class="form-group">
                     <label for="notes" class="form-label">Notizen</label>
                     <textarea id="notes" name="notes" class="form-input" style="padding-left: 16px; min-height: 80px; resize: vertical; padding-top: 10px;"></textarea>
+                </div>
+
+                <!-- Files Section -->
+                <div class="files-section" id="modal-files-section" style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <label class="form-label" style="margin-bottom: 0;">Dateien</label>
+                        <button type="button" class="btn-cancel" id="btn-upload-appointment-file" style="padding: 6px 12px; font-size: 0.85rem;" disabled>+ Datei anhängen</button>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; display: none;" id="files-hint">
+                        Speichere den Termin zuerst, um Dateien hochladen zu können.
+                    </div>
+                    <input type="file" id="appointment-file-input" style="display: none;">
+                    
+                    <div id="appointment-files-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Files populated here -->
+                    </div>
                 </div>
 
                 <!-- Edit History Section (Collapsible, hidden for new creations) -->
@@ -378,6 +443,23 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
             const historySection = document.getElementById('modal-history-section');
             const historyContent = document.getElementById('history-content');
             const historyDetails = document.getElementById('history-details');
+
+            // View Management
+            const navCalendar = document.getElementById('nav-calendar');
+            const navFiles = document.getElementById('nav-files');
+            const calendarView = document.getElementById('calendar-view');
+            const filesView = document.getElementById('files-view');
+            const mainTitle = document.getElementById('main-title');
+
+            // Files Elements
+            const uploadGlobalBtn = document.getElementById('upload-global-file-btn');
+            const globalFileInput = document.getElementById('global-file-input');
+            const filesTbody = document.getElementById('files-tbody');
+            
+            const btnUploadAppointmentFile = document.getElementById('btn-upload-appointment-file');
+            const appointmentFileInput = document.getElementById('appointment-file-input');
+            const appointmentFilesList = document.getElementById('appointment-files-list');
+            const filesHint = document.getElementById('files-hint');
 
             // Change Password Elements
             const changePwdBtn = document.getElementById('change-pwd-btn');
@@ -596,6 +678,13 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 historySection.style.display = 'none';
                 historyContent.innerHTML = '';
                 
+                // Files Section
+                btnUploadAppointmentFile.disabled = true;
+                btnUploadAppointmentFile.style.opacity = '0.5';
+                btnUploadAppointmentFile.style.cursor = 'not-allowed';
+                filesHint.style.display = 'block';
+                appointmentFilesList.innerHTML = '';
+                
                 // Pre-fill date to today (Berlin local)
                 const now = new Date();
                 const yyyy = now.getFullYear();
@@ -620,6 +709,13 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                         titleInput.value = apt.title;
                         locationInput.value = apt.location || '';
                         notesInput.value = apt.notes || '';
+
+                        // Files section
+                        btnUploadAppointmentFile.disabled = false;
+                        btnUploadAppointmentFile.style.opacity = '1';
+                        btnUploadAppointmentFile.style.cursor = 'pointer';
+                        filesHint.style.display = 'none';
+                        renderAppointmentFiles(data.files || [], apt.id);
 
                         // Format timestamp to datetime-local
                         const d = new Date(apt.appointment_date.replace(' ', 'T'));
@@ -865,6 +961,216 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
 
             // Initial load of table data
             loadAppointments();
+
+            // --- FILE MANAGEMENT LOGIC ---
+
+            // Navigation toggles
+            navCalendar.addEventListener('click', (e) => {
+                e.preventDefault();
+                navCalendar.classList.add('active');
+                navCalendar.style.background = 'var(--bg-hover)';
+                navCalendar.style.color = 'var(--text-primary)';
+                navFiles.classList.remove('active');
+                navFiles.style.background = 'transparent';
+                navFiles.style.color = 'var(--text-secondary)';
+                
+                filesView.style.display = 'none';
+                calendarView.style.display = 'block';
+                mainTitle.textContent = 'Kalender';
+                closeSidebar();
+                loadAppointments();
+            });
+
+            navFiles.addEventListener('click', (e) => {
+                e.preventDefault();
+                navFiles.classList.add('active');
+                navFiles.style.background = 'var(--bg-hover)';
+                navFiles.style.color = 'var(--text-primary)';
+                navCalendar.classList.remove('active');
+                navCalendar.style.background = 'transparent';
+                navCalendar.style.color = 'var(--text-secondary)';
+                
+                calendarView.style.display = 'none';
+                filesView.style.display = 'block';
+                mainTitle.textContent = 'Dateien';
+                closeSidebar();
+                loadGlobalFiles();
+            });
+
+            function formatBytes(bytes, decimals = 2) {
+                if (!+bytes) return '0 Bytes';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+            }
+
+            // Global Files Load
+            function loadGlobalFiles() {
+                fetch('files_api.php?action=list')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.success) {
+                            renderGlobalFiles(data.files);
+                        } else {
+                            filesTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:red;">Fehler beim Laden.</td></tr>`;
+                        }
+                    })
+                    .catch(err => console.error(err));
+            }
+
+            function renderGlobalFiles(files) {
+                filesTbody.innerHTML = '';
+                if (files.length === 0) {
+                    filesTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 30px;">Keine Dateien vorhanden.</td></tr>`;
+                    return;
+                }
+                
+                files.forEach(f => {
+                    const tr = document.createElement('tr');
+                    const isViewable = f.mime_type === 'application/pdf' || f.mime_type.startsWith('image/') || f.mime_type.startsWith('video/');
+                    const actionsHtml = `
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            ${isViewable ? `<a href="files_api.php?action=view&id=${f.id}" target="_blank" class="action-icon" title="Ansehen" style="color: var(--accent-blue); text-decoration: none;">👁️</a>` : ''}
+                            <a href="files_api.php?action=download&id=${f.id}" class="action-icon" title="Herunterladen" style="color: var(--text-primary); text-decoration: none;">⬇️</a>
+                            <button onclick="deleteFile(${f.id}, null)" class="action-icon" title="Löschen" style="color: var(--error); background: none; border: none; cursor: pointer;">🗑️</button>
+                        </div>
+                    `;
+                    tr.innerHTML = `
+                        <td data-label="Dateiname">${escapeHtml(f.original_filename)}</td>
+                        <td data-label="Termin">${f.appointment_title ? escapeHtml(f.appointment_title) : '-'}</td>
+                        <td data-label="Größe">${formatBytes(f.file_size)}</td>
+                        <td data-label="Von">${escapeHtml(f.uploader_name)}</td>
+                        <td data-label="Datum">${formatDateOnly(f.uploaded_at)}</td>
+                        <td data-label="Aktionen">${actionsHtml}</td>
+                    `;
+                    filesTbody.appendChild(tr);
+                });
+            }
+
+            function renderAppointmentFiles(files, appointmentId) {
+                appointmentFilesList.innerHTML = '';
+                if (files.length === 0) {
+                    appointmentFilesList.innerHTML = `<span style="color: var(--text-secondary); font-size: 0.9rem;">Keine Dateien angehängt.</span>`;
+                    return;
+                }
+                
+                files.forEach(f => {
+                    const div = document.createElement('div');
+                    div.style.display = 'flex';
+                    div.style.justifyContent = 'space-between';
+                    div.style.alignItems = 'center';
+                    div.style.padding = '8px 12px';
+                    div.style.background = 'var(--bg-secondary)';
+                    div.style.borderRadius = '6px';
+                    div.style.border = '1px solid var(--border-color)';
+                    
+                    const isViewable = f.mime_type === 'application/pdf' || f.mime_type.startsWith('image/') || f.mime_type.startsWith('video/');
+                    
+                    div.innerHTML = `
+                        <div style="display: flex; flex-direction: column; overflow: hidden;">
+                            <span style="font-weight: 500; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(f.original_filename)}">${escapeHtml(f.original_filename)}</span>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">${formatBytes(f.file_size)} • ${escapeHtml(f.uploader_name)}</span>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; padding-left: 12px; flex-shrink: 0;">
+                            ${isViewable ? `<a href="files_api.php?action=view&id=${f.id}" target="_blank" title="Ansehen" style="text-decoration: none;">👁️</a>` : ''}
+                            <a href="files_api.php?action=download&id=${f.id}" title="Herunterladen" style="text-decoration: none;">⬇️</a>
+                            <button type="button" onclick="deleteFile(${f.id}, ${appointmentId})" title="Löschen" style="background: none; border: none; cursor: pointer;">🗑️</button>
+                        </div>
+                    `;
+                    appointmentFilesList.appendChild(div);
+                });
+            }
+
+            window.deleteFile = function(fileId, appointmentId) {
+                if (!confirm('Möchtest du diese Datei wirklich löschen?')) return;
+                
+                fetch('files_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', id: fileId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.success) {
+                        if (appointmentId) {
+                            openEditModal(appointmentId); // Refresh modal
+                        } else {
+                            loadGlobalFiles(); // Refresh list
+                        }
+                    } else {
+                        alert(data?.error || 'Fehler beim Löschen.');
+                    }
+                })
+                .catch(err => console.error(err));
+            };
+
+            function handleFileUpload(fileInput, appointmentId = null) {
+                const file = fileInput.files[0];
+                if (!file) return;
+                
+                // Limit 1 GB
+                if (file.size > 1073741824) {
+                    alert('Die Datei ist zu groß. (Max. 1 GB)');
+                    fileInput.value = '';
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('action', 'upload');
+                formData.append('file', file);
+                if (appointmentId) {
+                    formData.append('appointment_id', appointmentId);
+                }
+
+                // Show uploading state
+                const originalText = appointmentId ? btnUploadAppointmentFile.textContent : uploadGlobalBtn.innerHTML;
+                if (appointmentId) btnUploadAppointmentFile.textContent = 'Lädt...';
+                else uploadGlobalBtn.textContent = 'Lädt...';
+
+                fetch('files_api.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    fileInput.value = '';
+                    if (appointmentId) btnUploadAppointmentFile.textContent = '+ Datei anhängen';
+                    else uploadGlobalBtn.innerHTML = originalText;
+
+                    if (data && data.success) {
+                        if (appointmentId) {
+                            openEditModal(appointmentId); // Refresh modal to show new file
+                        } else {
+                            loadGlobalFiles(); // Refresh list
+                        }
+                    } else {
+                        alert(data?.error || 'Fehler beim Upload.');
+                    }
+                })
+                .catch(err => {
+                    fileInput.value = '';
+                    if (appointmentId) btnUploadAppointmentFile.textContent = '+ Datei anhängen';
+                    else uploadGlobalBtn.innerHTML = originalText;
+                    console.error('Upload Error:', err);
+                    alert('Systemfehler beim Upload.');
+                });
+            }
+
+            uploadGlobalBtn.addEventListener('click', () => globalFileInput.click());
+            globalFileInput.addEventListener('change', () => handleFileUpload(globalFileInput, null));
+
+            btnUploadAppointmentFile.addEventListener('click', () => {
+                if (!btnUploadAppointmentFile.disabled) {
+                    appointmentFileInput.click();
+                }
+            });
+            appointmentFileInput.addEventListener('change', () => {
+                const appId = appointmentIdInput.value;
+                if (appId) handleFileUpload(appointmentFileInput, appId);
+            });
+
         });
     </script>
 </body>

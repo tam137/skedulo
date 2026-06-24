@@ -90,10 +90,22 @@ try {
                 $log['changes'] = json_decode($log['changes'], true);
             }
 
+            // Fetch attached files
+            $stmtFiles = $pdo->prepare("
+                SELECT f.id, f.original_filename, f.mime_type, f.file_size, f.uploaded_at, acc.username as uploader_name
+                FROM files f
+                JOIN accounts acc ON f.uploaded_by = acc.id
+                WHERE f.appointment_id = :id
+                ORDER BY f.uploaded_at ASC
+            ");
+            $stmtFiles->execute(['id' => $id]);
+            $files = $stmtFiles->fetchAll();
+
             echo json_encode([
                 'success' => true,
                 'appointment' => $appointment,
-                'history' => $history
+                'history' => $history,
+                'files' => $files
             ]);
             break;
 
