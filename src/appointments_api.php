@@ -25,7 +25,8 @@ try {
 
             // Fetch upcoming appointments (next first: ASC)
             $stmt = $pdo->prepare("
-                SELECT a.*, acc.username as creator_name 
+                SELECT a.*, acc.username as creator_name,
+                       (SELECT COUNT(*) FROM files f WHERE f.appointment_id = a.id) as file_count
                 FROM appointments a
                 JOIN accounts acc ON a.created_by = acc.id
                 WHERE a.appointment_date >= :today
@@ -36,7 +37,8 @@ try {
 
             // Fetch past appointments (recent past first: DESC)
             $stmt = $pdo->prepare("
-                SELECT a.*, acc.username as creator_name 
+                SELECT a.*, acc.username as creator_name,
+                       (SELECT COUNT(*) FROM files f WHERE f.appointment_id = a.id) as file_count
                 FROM appointments a
                 JOIN accounts acc ON a.created_by = acc.id
                 WHERE a.appointment_date < :today

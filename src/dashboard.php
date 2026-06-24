@@ -641,8 +641,11 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                     const locationEscaped = escapeHtml(apt.location || '-');
                     const notesEscaped = escapeHtml(apt.notes || '-');
 
+                    const fileCount = parseInt(apt.file_count || 0, 10);
+                    const fileIndicatorHtml = fileCount > 0 ? ` <span class="file-indicator" title="${fileCount} Datei${fileCount > 1 ? 'en' : ''} angehängt">📎</span>` : '';
+
                     tr.innerHTML = `
-                        <td class="cell-date" data-label="Datum">${dateHtml}</td>
+                        <td class="cell-date" data-label="Datum">${dateHtml}${fileIndicatorHtml}</td>
                         <td class="cell-title" data-label="Name">${titleEscaped}</td>
                         <td data-label="Ort">${locationEscaped}</td>
                         <td data-label="Notizen" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${notesEscaped}</td>
