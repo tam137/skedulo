@@ -239,6 +239,20 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Symbol</label>
+                    <input type="hidden" id="appointment-icon" name="icon" value="">
+                    <div class="emoji-picker" id="emoji-picker">
+                        <button type="button" class="emoji-btn btn-none" data-emoji="" title="Kein Symbol">🚫</button>
+                        <button type="button" class="emoji-btn" data-emoji="❤️" title="Herz">❤️</button>
+                        <button type="button" class="emoji-btn" data-emoji="🏃‍♀️" title="Sportlerin">🏃‍♀️</button>
+                        <button type="button" class="emoji-btn" data-emoji="💃🕺" title="Tanzpaar">💃🕺</button>
+                        <button type="button" class="emoji-btn" data-emoji="🌴" title="Urlaubspalme">🌴</button>
+                        <button type="button" class="emoji-btn" data-emoji="💻" title="Arbeitslaptop">💻</button>
+                        <button type="button" class="emoji-btn" data-emoji="🧑‍⚕️" title="Doctor">🧑‍⚕️</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label for="appointment_date" class="form-label">Datum</label>
                     <div class="input-wrapper">
                         <div class="input-icon">
@@ -432,6 +446,9 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
             const dateInput = document.getElementById('appointment_date');
             const locationInput = document.getElementById('location');
             const notesInput = document.getElementById('notes');
+            const appointmentIconInput = document.getElementById('appointment-icon');
+            const emojiPicker = document.getElementById('emoji-picker');
+            const emojiBtns = emojiPicker.querySelectorAll('.emoji-btn');
             
             // Buttons
             const addBtn = document.getElementById('add-appointment-btn');
@@ -616,7 +633,8 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                     tr.dataset.id = apt.id;
                     
                     const dateHtml = formatAppointmentDate(apt.appointment_date);
-                    const titleEscaped = escapeHtml(apt.title);
+                    const iconPrefix = apt.icon ? apt.icon + ' ' : '';
+                    const titleEscaped = iconPrefix + escapeHtml(apt.title);
                     const locationEscaped = escapeHtml(apt.location || '-');
                     const notesEscaped = escapeHtml(apt.notes || '-');
 
@@ -678,6 +696,16 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 historySection.style.display = 'none';
                 historyContent.innerHTML = '';
                 
+                // Reset emoji picker to none
+                appointmentIconInput.value = '';
+                emojiBtns.forEach(btn => {
+                    if (btn.dataset.emoji === '') {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+                
                 // Files Section
                 btnUploadAppointmentFile.disabled = true;
                 btnUploadAppointmentFile.style.opacity = '0.5';
@@ -709,6 +737,17 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                         titleInput.value = apt.title;
                         locationInput.value = apt.location || '';
                         notesInput.value = apt.notes || '';
+
+                        // Set emoji picker value and active button styling
+                        const currentIcon = apt.icon || '';
+                        appointmentIconInput.value = currentIcon;
+                        emojiBtns.forEach(btn => {
+                            if (btn.dataset.emoji === currentIcon) {
+                                btn.classList.add('active');
+                            } else {
+                                btn.classList.remove('active');
+                            }
+                        });
 
                         // Files section
                         btnUploadAppointmentFile.disabled = false;
@@ -785,7 +824,8 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                     title: 'Name',
                     location: 'Ort',
                     appointment_date: 'Datum',
-                    notes: 'Notizen'
+                    notes: 'Notizen',
+                    icon: 'Symbol'
                 };
                 let html = '';
                 for (const field in changes) {
@@ -829,6 +869,15 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
             closeModalBtn.addEventListener('click', closeModal);
             cancelModalBtn.addEventListener('click', closeModal);
             
+            // Emoji Selection Handler
+            emojiBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    emojiBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    appointmentIconInput.value = btn.dataset.emoji;
+                });
+            });
+            
             deleteBtn.addEventListener('click', () => {
                 const id = appointmentIdInput.value;
                 if (id) {
@@ -860,7 +909,8 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                     title: titleInput.value,
                     appointment_date: dateInput.value,
                     location: locationInput.value,
-                    notes: notesInput.value
+                    notes: notesInput.value,
+                    icon: appointmentIconInput.value
                 };
 
                 function intval(val) {

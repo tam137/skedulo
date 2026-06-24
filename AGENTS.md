@@ -56,5 +56,5 @@ Die detaillierten Implementierungsschritte, der standardisierte PHP-Codeblock so
 
 ---
 
-*Letzte Aktualisierung: 2026-06-24 von Antigravity-Agent (Ablauf in AGENTS.md strukturiert und Live-Deployment als Schritt hinzugefügt).*
+*Letzte Aktualisierung: 2026-06-24 von Antigravity-Agent (appointment-Tabelle um icon-Spalte erweitert).*
 

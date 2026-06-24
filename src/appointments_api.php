@@ -114,6 +114,7 @@ try {
             $location = trim($input['location'] ?? '');
             $dateRaw = trim($input['appointment_date'] ?? '');
             $notes = trim($input['notes'] ?? '');
+            $icon = trim($input['icon'] ?? '');
 
             if (empty($title)) {
                 throw new Exception('Bitte gib einen Namen für den Termin ein.');
@@ -125,8 +126,8 @@ try {
             $dateFormatted = date('Y-m-d 00:00:00', strtotime($dateRaw));
 
             $stmt = $pdo->prepare("
-                INSERT INTO appointments (title, location, appointment_date, created_by, notes)
-                VALUES (:title, :location, :appointment_date, :created_by, :notes)
+                INSERT INTO appointments (title, location, appointment_date, created_by, notes, icon)
+                VALUES (:title, :location, :appointment_date, :created_by, :notes, :icon)
                 RETURNING id
             ");
             $stmt->execute([
@@ -134,7 +135,8 @@ try {
                 'location' => $location !== '' ? $location : null,
                 'appointment_date' => $dateFormatted,
                 'created_by' => $userId,
-                'notes' => $notes !== '' ? $notes : null
+                'notes' => $notes !== '' ? $notes : null,
+                'icon' => $icon !== '' ? $icon : null
             ]);
             $newId = $stmt->fetchColumn();
 
@@ -155,6 +157,7 @@ try {
             $location = trim($input['location'] ?? '');
             $dateRaw = trim($input['appointment_date'] ?? '');
             $notes = trim($input['notes'] ?? '');
+            $icon = trim($input['icon'] ?? '');
 
             if (empty($title)) {
                 throw new Exception('Der Name des Termins darf nicht leer sein.');
@@ -204,6 +207,11 @@ try {
                 $changes['notes'] = ['old' => $oldNotes, 'new' => $notes];
             }
 
+            $oldIcon = $existing['icon'] ?? '';
+            if ($oldIcon !== $icon) {
+                $changes['icon'] = ['old' => $oldIcon, 'new' => $icon];
+            }
+
             // Only log and update if something actually changed
             if (!empty($changes)) {
                 // Insert change log
@@ -224,6 +232,7 @@ try {
                         location = :location, 
                         appointment_date = :appointment_date, 
                         notes = :notes, 
+                        icon = :icon,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = :id
                 ");
@@ -232,6 +241,7 @@ try {
                     'location' => $location !== '' ? $location : null,
                     'appointment_date' => $newDateFormatted,
                     'notes' => $notes !== '' ? $notes : null,
+                    'icon' => $icon !== '' ? $icon : null,
                     'id' => $id
                 ]);
             }
