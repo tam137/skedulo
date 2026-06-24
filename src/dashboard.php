@@ -57,20 +57,6 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
         
         <div class="meta-grid" style="grid-template-columns: 1fr; gap: 12px;">
             <div class="meta-item" style="padding: 12px 16px;">
-                <div class="meta-item-label">ID (Primary Key)</div>
-                <div class="meta-item-value" style="font-size: 0.95rem;">#<?php echo htmlspecialchars($user['id']); ?></div>
-            </div>
-            <div class="meta-item" style="padding: 12px 16px;">
-                <div class="meta-item-label">Benutzername</div>
-                <div class="meta-item-value" style="font-size: 0.95rem;"><?php echo htmlspecialchars($user['username']); ?></div>
-            </div>
-            <div class="meta-item" style="padding: 12px 16px;">
-                <div class="meta-item-label">Registriert am</div>
-                <div class="meta-item-value" style="font-size: 0.95rem;">
-                    <?php echo date('d.m.Y H:i', strtotime($user['created_at'])); ?>
-                </div>
-            </div>
-            <div class="meta-item" style="padding: 12px 16px;">
                 <div class="meta-item-label">Letzter Login</div>
                 <div class="meta-item-value" style="font-size: 0.95rem;">
                     <?php 
