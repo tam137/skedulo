@@ -20,6 +20,16 @@ $action = $_GET['action'] ?? $input['action'] ?? '';
 
 try {
     switch ($action) {
+        case 'users':
+            $stmt = $pdo->prepare("SELECT id, username FROM accounts WHERE is_active = true AND id != :id ORDER BY username ASC");
+            $stmt->execute(['id' => $userId]);
+            $users = $stmt->fetchAll();
+            echo json_encode([
+                'success' => true,
+                'users' => $users
+            ]);
+            break;
+
         case 'list':
             $today = date('Y-m-d');
 
@@ -30,9 +40,16 @@ try {
                 FROM appointments a
                 JOIN accounts acc ON a.created_by = acc.id
                 WHERE a.appointment_date >= :today
+                  AND (
+                      a.created_by = :userId
+                      OR EXISTS (
+                          SELECT 1 FROM appointment_permissions ap
+                          WHERE ap.appointment_id = a.id AND ap.account_id = :userId
+                      )
+                  )
                 ORDER BY a.appointment_date ASC
             ");
-            $stmt->execute(['today' => $today]);
+            $stmt->execute(['today' => $today, 'userId' => $userId]);
             $upcoming = $stmt->fetchAll();
 
             // Fetch past appointments (recent past first: DESC)
@@ -42,9 +59,16 @@ try {
                 FROM appointments a
                 JOIN accounts acc ON a.created_by = acc.id
                 WHERE a.appointment_date < :today
+                  AND (
+                      a.created_by = :userId
+                      OR EXISTS (
+                          SELECT 1 FROM appointment_permissions ap
+                          WHERE ap.appointment_id = a.id AND ap.account_id = :userId
+                      )
+                  )
                 ORDER BY a.appointment_date DESC
             ");
-            $stmt->execute(['today' => $today]);
+            $stmt->execute(['today' => $today, 'userId' => $userId]);
             $past = $stmt->fetchAll();
 
             echo json_encode([
@@ -76,6 +100,20 @@ try {
                 exit;
             }
 
+            // Check access permission: creator or explicitly shared in appointment_permissions
+            if ($appointment['created_by'] !== $userId) {
+                $stmtPerm = $pdo->prepare("
+                    SELECT 1 FROM appointment_permissions 
+                    WHERE appointment_id = :appointment_id AND account_id = :account_id
+                ");
+                $stmtPerm->execute(['appointment_id' => $id, 'account_id' => $userId]);
+                if (!$stmtPerm->fetch()) {
+                    http_response_code(403);
+                    echo json_encode(['error' => 'Keine Berechtigung für diesen Termin.']);
+                    exit;
+                }
+            }
+
             // Fetch edit history
             $stmt = $pdo->prepare("
                 SELECT h.*, acc.username as changer_name 
@@ -103,11 +141,17 @@ try {
             $stmtFiles->execute(['id' => $id]);
             $files = $stmtFiles->fetchAll();
 
+            // Fetch sharing permissions
+            $stmtPerms = $pdo->prepare("SELECT account_id FROM appointment_permissions WHERE appointment_id = :id");
+            $stmtPerms->execute(['id' => $id]);
+            $allowedUsers = $stmtPerms->fetchAll(PDO::FETCH_COLUMN);
+
             echo json_encode([
                 'success' => true,
                 'appointment' => $appointment,
                 'history' => $history,
-                'files' => $files
+                'files' => $files,
+                'allowed_users' => $allowedUsers
             ]);
             break;
 
@@ -127,6 +171,8 @@ try {
 
             $dateFormatted = date('Y-m-d 00:00:00', strtotime($dateRaw));
 
+            $pdo->beginTransaction();
+
             $stmt = $pdo->prepare("
                 INSERT INTO appointments (title, location, appointment_date, created_by, notes, icon)
                 VALUES (:title, :location, :appointment_date, :created_by, :notes, :icon)
@@ -141,6 +187,22 @@ try {
                 'icon' => $icon !== '' ? $icon : null
             ]);
             $newId = $stmt->fetchColumn();
+
+            // Insert sharing permissions
+            if (isset($input['allowed_users']) && is_array($input['allowed_users'])) {
+                $stmtPerm = $pdo->prepare("INSERT INTO appointment_permissions (appointment_id, account_id) VALUES (:appointment_id, :account_id)");
+                foreach ($input['allowed_users'] as $allowedUserId) {
+                    $allowedUserId = intval($allowedUserId);
+                    if ($allowedUserId !== $userId) {
+                        $stmtPerm->execute([
+                            'appointment_id' => $newId,
+                            'account_id' => $allowedUserId
+                        ]);
+                    }
+                }
+            }
+
+            $pdo->commit();
 
             echo json_encode([
                 'success' => true,
@@ -181,6 +243,21 @@ try {
                 http_response_code(404);
                 echo json_encode(['error' => 'Termin zum Bearbeiten nicht gefunden.']);
                 exit;
+            }
+
+            // Check write permission: creator or shared user
+            if ($existing['created_by'] !== $userId) {
+                $stmtPerm = $pdo->prepare("
+                    SELECT 1 FROM appointment_permissions 
+                    WHERE appointment_id = :appointment_id AND account_id = :account_id
+                ");
+                $stmtPerm->execute(['appointment_id' => $id, 'account_id' => $userId]);
+                if (!$stmtPerm->fetch()) {
+                    $pdo->rollBack();
+                    http_response_code(403);
+                    echo json_encode(['error' => 'Keine Berechtigung diesen Termin zu bearbeiten.']);
+                    exit;
+                }
             }
 
             $oldDate = date('Y-m-d', strtotime($existing['appointment_date']));
@@ -248,6 +325,23 @@ try {
                 ]);
             }
 
+            // Delete and re-insert sharing permissions
+            $stmtDelPerm = $pdo->prepare("DELETE FROM appointment_permissions WHERE appointment_id = :id");
+            $stmtDelPerm->execute(['id' => $id]);
+
+            if (isset($input['allowed_users']) && is_array($input['allowed_users'])) {
+                $stmtAddPerm = $pdo->prepare("INSERT INTO appointment_permissions (appointment_id, account_id) VALUES (:appointment_id, :account_id)");
+                foreach ($input['allowed_users'] as $allowedUserId) {
+                    $allowedUserId = intval($allowedUserId);
+                    if ($allowedUserId !== $existing['created_by']) { // creator always has access
+                        $stmtAddPerm->execute([
+                            'appointment_id' => $id,
+                            'account_id' => $allowedUserId
+                        ]);
+                    }
+                }
+            }
+
             $pdo->commit();
 
             echo json_encode([
@@ -263,8 +357,39 @@ try {
                 throw new Exception('Ungültige Termin-ID.');
             }
 
-            $stmt = $pdo->prepare("DELETE FROM appointments WHERE id = :id");
+            $pdo->beginTransaction();
+
+            // Fetch existing appointment to check permission
+            $stmt = $pdo->prepare("SELECT * FROM appointments WHERE id = :id FOR UPDATE");
             $stmt->execute(['id' => $id]);
+            $existing = $stmt->fetch();
+
+            if (!$existing) {
+                $pdo->rollBack();
+                http_response_code(404);
+                echo json_encode(['error' => 'Termin nicht gefunden.']);
+                exit;
+            }
+
+            // Check permission: creator or shared user
+            if ($existing['created_by'] !== $userId) {
+                $stmtPerm = $pdo->prepare("
+                    SELECT 1 FROM appointment_permissions 
+                    WHERE appointment_id = :appointment_id AND account_id = :account_id
+                ");
+                $stmtPerm->execute(['appointment_id' => $id, 'account_id' => $userId]);
+                if (!$stmtPerm->fetch()) {
+                    $pdo->rollBack();
+                    http_response_code(403);
+                    echo json_encode(['error' => 'Keine Berechtigung diesen Termin zu löschen.']);
+                    exit;
+                }
+            }
+
+            $stmtDel = $pdo->prepare("DELETE FROM appointments WHERE id = :id");
+            $stmtDel->execute(['id' => $id]);
+
+            $pdo->commit();
 
             echo json_encode([
                 'success' => true,

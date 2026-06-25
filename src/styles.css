@@ -1138,3 +1138,193 @@ tr:hover .file-indicator {
     transform: scale(1.15);
 }
 
+/* Custom Multi-select Dropdown styling */
+.custom-multiselect {
+    position: relative;
+    width: 100%;
+}
+
+.multiselect-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 48px;
+    box-sizing: border-box;
+}
+
+.multiselect-trigger:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+.custom-multiselect.active .multiselect-trigger {
+    border-color: var(--accent-indigo);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.multiselect-placeholder {
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 0.95rem;
+}
+
+.multiselect-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 90%;
+}
+
+.multiselect-tag {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.15));
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+}
+
+.multiselect-tag-remove {
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-weight: bold;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.multiselect-tag-remove:hover {
+    color: var(--error);
+}
+
+.multiselect-arrow {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+    user-select: none;
+}
+
+.custom-multiselect.active .multiselect-arrow {
+    transform: rotate(180deg);
+}
+
+.multiselect-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 100%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    z-index: 1020;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.custom-multiselect.active .multiselect-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.multiselect-search-container {
+    margin-bottom: 8px;
+}
+
+.multiselect-search {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: #ffffff;
+    outline: none;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.multiselect-search:focus {
+    border-color: var(--accent-indigo);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.multiselect-options {
+    max-height: 180px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.multiselect-option {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    user-select: none;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.multiselect-option:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.multiselect-option.selected {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-blue);
+}
+
+.multiselect-option-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.multiselect-option.selected .multiselect-option-checkbox {
+    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+    border-color: transparent;
+}
+
+.multiselect-option-checkbox::after {
+    content: "✓";
+    color: #ffffff;
+    font-size: 0.75rem;
+    display: none;
+    font-weight: bold;
+}
+
+.multiselect-option.selected .multiselect-option-checkbox::after {
+    display: block;
+}
+
+.multiselect-option-text {
+    flex-grow: 1;
+}

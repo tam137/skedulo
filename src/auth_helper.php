@@ -57,7 +57,7 @@ function check_remember_me() {
             $pdo = get_db_connection();
             // Retrieve token and joined user details
             $stmt = $pdo->prepare("
-                SELECT r.id AS token_id, r.token_hash, r.account_id, a.username, a.is_active 
+                SELECT r.id AS token_id, r.token_hash, r.account_id, a.username, a.is_active, a.role 
                 FROM remember_me_tokens r 
                 JOIN accounts a ON r.account_id = a.id 
                 WHERE r.selector = :selector AND r.expires_at > CURRENT_TIMESTAMP
@@ -73,6 +73,7 @@ function check_remember_me() {
                         $_SESSION['logged_in'] = true;
                         $_SESSION['user_id'] = $token_row['account_id'];
                         $_SESSION['username'] = $token_row['username'];
+                        $_SESSION['role'] = $token_row['role'];
 
                         // Update last login timestamp
                         $stmt_update = $pdo->prepare("UPDATE accounts SET last_login_at = CURRENT_TIMESTAMP WHERE id = :id");

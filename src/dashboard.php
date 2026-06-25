@@ -280,6 +280,24 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                     <textarea id="notes" name="notes" class="form-input" style="padding-left: 16px; min-height: 80px; resize: vertical; padding-top: 10px;"></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label">Teilen mit (Lese- & Schreibrechte)</label>
+                    <div class="custom-multiselect" id="appointment-sharing-select">
+                        <div class="multiselect-trigger">
+                            <span class="multiselect-placeholder">Niemandem freigegeben</span>
+                            <span class="multiselect-arrow">▼</span>
+                        </div>
+                        <div class="multiselect-dropdown">
+                            <div class="multiselect-search-container">
+                                <input type="text" class="multiselect-search" placeholder="Benutzer suchen...">
+                            </div>
+                            <div class="multiselect-options">
+                                <!-- Options will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Files Section -->
                 <div class="files-section" id="modal-files-section" style="margin-bottom: 24px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -423,7 +441,44 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 </div>
             </form>
         </div>
-    </div>
+    <!-- Global File Upload Modal -->
+      <div class="modal-overlay" id="upload-file-modal">
+          <div class="modal-card" style="max-width: 460px;">
+              <div class="modal-header">
+                  <h3 class="modal-title">Datei hochladen</h3>
+                  <button class="close-btn" id="close-upload-modal-btn">&times;</button>
+              </div>
+              <form id="global-file-upload-form" autocomplete="off">
+                  <div class="form-group">
+                      <label class="form-label" for="global-upload-file-field">Datei auswählen</label>
+                      <input type="file" id="global-upload-file-field" class="form-input" style="padding-left: 16px;" required>
+                  </div>
+
+                  <div class="form-group">
+                      <label class="form-label">Freigeben für (Zwingend erforderlich)</label>
+                      <div class="custom-multiselect" id="file-sharing-select">
+                          <div class="multiselect-trigger">
+                              <span class="multiselect-placeholder">Bitte wähle mindestens einen Benutzer...</span>
+                              <span class="multiselect-arrow">▼</span>
+                          </div>
+                          <div class="multiselect-dropdown">
+                              <div class="multiselect-search-container">
+                                  <input type="text" class="multiselect-search" placeholder="Benutzer suchen...">
+                              </div>
+                              <div class="multiselect-options">
+                                  <!-- Options will be populated here -->
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="modal-footer" style="padding-top: 16px;">
+                      <button type="button" class="btn-cancel" id="cancel-upload-modal-btn">Abbrechen</button>
+                      <button type="submit" class="btn-save" id="save-upload-modal-btn">Hochladen</button>
+                  </div>
+              </form>
+          </div>
+      </div>
 
     <!-- Flatpickr Library -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -510,6 +565,218 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
             });
 
             let currentDeleteId = null;
+
+            // Global Upload Modal Elements
+            const uploadFileModal = document.getElementById('upload-file-modal');
+            const closeUploadModalBtn = document.getElementById('close-upload-modal-btn');
+            const cancelUploadModalBtn = document.getElementById('cancel-upload-modal-btn');
+            const globalFileUploadForm = document.getElementById('global-file-upload-form');
+            const globalUploadFileField = document.getElementById('global-upload-file-field');
+            const saveUploadModalBtn = document.getElementById('save-upload-modal-btn');
+
+            class CustomMultiSelect {
+                constructor(elementId, placeholderText = 'Benutzer auswählen...') {
+                    this.container = document.getElementById(elementId);
+                    this.trigger = this.container.querySelector('.multiselect-trigger');
+                    this.placeholder = this.trigger.querySelector('.multiselect-placeholder');
+                    this.dropdown = this.container.querySelector('.multiselect-dropdown');
+                    this.searchInput = this.container.querySelector('.multiselect-search');
+                    this.optionsContainer = this.container.querySelector('.multiselect-options');
+                    this.placeholderText = placeholderText;
+                    this.users = []; // {id, username}
+                    this.selectedIds = new Set();
+                    
+                    this.initEvents();
+                }
+                
+                setUsers(users) {
+                    this.users = users;
+                    this.renderOptions();
+                }
+                
+                initEvents() {
+                    this.trigger.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleDropdown();
+                    });
+                    
+                    this.searchInput.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
+                    
+                    this.searchInput.addEventListener('input', () => {
+                        this.filterOptions();
+                    });
+                    
+                    document.addEventListener('click', () => {
+                        this.closeDropdown();
+                    });
+                }
+                
+                toggleDropdown() {
+                    document.querySelectorAll('.custom-multiselect').forEach(el => {
+                        if (el !== this.container) {
+                            el.classList.remove('active');
+                        }
+                    });
+                    this.container.classList.toggle('active');
+                    if (this.container.classList.contains('active')) {
+                        this.searchInput.focus();
+                        this.searchInput.value = '';
+                        this.filterOptions();
+                    }
+                }
+                
+                closeDropdown() {
+                    this.container.classList.remove('active');
+                }
+                
+                renderOptions() {
+                    this.optionsContainer.innerHTML = '';
+                    this.users.forEach(user => {
+                        const option = document.createElement('div');
+                        option.className = 'multiselect-option';
+                        option.dataset.id = user.id;
+                        if (this.selectedIds.has(user.id)) {
+                            option.classList.add('selected');
+                        }
+                        
+                        option.innerHTML = `
+                            <div class="multiselect-option-checkbox"></div>
+                            <div class="multiselect-option-text">${escapeHtml(user.username)}</div>
+                        `;
+                        
+                        option.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.toggleOption(user.id, option);
+                        });
+                        
+                        this.optionsContainer.appendChild(option);
+                    });
+                    
+                    this.updateTrigger();
+                }
+                
+                toggleOption(id, optionElement) {
+                    if (this.selectedIds.has(id)) {
+                        this.selectedIds.delete(id);
+                        optionElement.classList.remove('selected');
+                    } else {
+                        this.selectedIds.add(id);
+                        optionElement.classList.add('selected');
+                    }
+                    this.updateTrigger();
+                    this.triggerEvent();
+                }
+                
+                getSelected() {
+                    return Array.from(this.selectedIds);
+                }
+                
+                setSelected(ids) {
+                    this.selectedIds = new Set(ids.map(Number));
+                    this.updateOptionsUI();
+                    this.updateTrigger();
+                }
+                
+                clear() {
+                    this.selectedIds.clear();
+                    this.updateOptionsUI();
+                    this.updateTrigger();
+                }
+                
+                updateOptionsUI() {
+                    const options = this.optionsContainer.querySelectorAll('.multiselect-option');
+                    options.forEach(opt => {
+                        const id = Number(opt.dataset.id);
+                        if (this.selectedIds.has(id)) {
+                            opt.classList.add('selected');
+                        } else {
+                            opt.classList.remove('selected');
+                        }
+                    });
+                }
+                
+                updateTrigger() {
+                    const existingTags = this.trigger.querySelector('.multiselect-tags');
+                    if (existingTags) {
+                        existingTags.remove();
+                    }
+                    
+                    if (this.selectedIds.size === 0) {
+                        this.placeholder.style.display = 'block';
+                        this.placeholder.textContent = this.placeholderText;
+                    } else {
+                        this.placeholder.style.display = 'none';
+                        const tagsContainer = document.createElement('div');
+                        tagsContainer.className = 'multiselect-tags';
+                        
+                        this.users.forEach(user => {
+                            if (this.selectedIds.has(user.id)) {
+                                const tag = document.createElement('span');
+                                tag.className = 'multiselect-tag';
+                                tag.textContent = user.username;
+                                
+                                const removeBtn = document.createElement('span');
+                                removeBtn.className = 'multiselect-tag-remove';
+                                removeBtn.innerHTML = '&times;';
+                                removeBtn.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    this.selectedIds.delete(user.id);
+                                    this.updateOptionsUI();
+                                    this.updateTrigger();
+                                    this.triggerEvent();
+                                });
+                                
+                                tag.appendChild(removeBtn);
+                                tagsContainer.appendChild(tag);
+                            }
+                        });
+                        
+                        this.trigger.insertBefore(tagsContainer, this.trigger.querySelector('.multiselect-arrow'));
+                    }
+                }
+                
+                filterOptions() {
+                    const query = this.searchInput.value.toLowerCase().trim();
+                    const options = this.optionsContainer.querySelectorAll('.multiselect-option');
+                    options.forEach(opt => {
+                        const username = opt.querySelector('.multiselect-option-text').textContent.toLowerCase();
+                        if (username.includes(query)) {
+                            opt.style.display = 'flex';
+                        } else {
+                            opt.style.display = 'none';
+                        }
+                    });
+                }
+                
+                triggerEvent() {
+                    const event = new CustomEvent('change', { detail: this.getSelected() });
+                    this.container.dispatchEvent(event);
+                }
+            }
+
+            let userList = [];
+            let appointmentSharingSelect = null;
+            let fileSharingSelect = null;
+
+            function fetchUsers() {
+                fetch('appointments_api.php?action=users')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.success) {
+                            userList = data.users;
+                            appointmentSharingSelect = new CustomMultiSelect('appointment-sharing-select', 'Niemandem freigegeben');
+                            appointmentSharingSelect.setUsers(userList);
+                            
+                            fileSharingSelect = new CustomMultiSelect('file-sharing-select', 'Bitte wähle mindestens einen Benutzer...');
+                            fileSharingSelect.setUsers(userList);
+                        }
+                    })
+                    .catch(err => console.error('Error fetching users:', err));
+            }
+            
+            fetchUsers();
 
             // --- Toggle Sidebar ---
             function openSidebar() {
@@ -702,6 +969,11 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 historySection.style.display = 'none';
                 historyContent.innerHTML = '';
                 
+                // Clear sharing selection
+                if (appointmentSharingSelect) {
+                    appointmentSharingSelect.clear();
+                }
+
                 // Reset emoji picker to none
                 appointmentIconInput.value = '';
                 emojiBtns.forEach(btn => {
@@ -743,6 +1015,11 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                         titleInput.value = apt.title;
                         locationInput.value = apt.location || '';
                         notesInput.value = apt.notes || '';
+
+                        // Set sharing permissions
+                        if (appointmentSharingSelect) {
+                            appointmentSharingSelect.setSelected(data.allowed_users || []);
+                        }
 
                         // Set emoji picker value and active button styling
                         const currentIcon = apt.icon || '';
@@ -900,6 +1177,9 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                     hideConfirmOverlay();
                     closeSidebar();
                     closePwdModal();
+                    if (typeof closeUploadModal === 'function') {
+                        closeUploadModal();
+                    }
                 }
             });
 
@@ -916,7 +1196,8 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                     appointment_date: dateInput.value,
                     location: locationInput.value,
                     notes: notesInput.value,
-                    icon: appointmentIconInput.value
+                    icon: appointmentIconInput.value,
+                    allowed_users: appointmentSharingSelect ? appointmentSharingSelect.getSelected() : []
                 };
 
                 function intval(val) {
@@ -1162,7 +1443,34 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 .catch(err => console.error(err));
             };
 
-            function handleFileUpload(fileInput, appointmentId = null) {
+            function openUploadModal() {
+                globalFileUploadForm.reset();
+                if (fileSharingSelect) {
+                    fileSharingSelect.clear();
+                }
+                uploadFileModal.classList.add('active');
+            }
+
+            function closeUploadModal() {
+                uploadFileModal.classList.remove('active');
+                globalFileUploadForm.reset();
+            }
+
+            uploadGlobalBtn.addEventListener('click', openUploadModal);
+            closeUploadModalBtn.addEventListener('click', closeUploadModal);
+            cancelUploadModalBtn.addEventListener('click', closeUploadModal);
+
+            globalFileUploadForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const allowed = fileSharingSelect.getSelected();
+                if (allowed.length === 0) {
+                    alert('Bitte wähle mindestens einen Benutzer aus, mit dem diese Datei geteilt werden soll.');
+                    return;
+                }
+                handleFileUpload(globalUploadFileField, null, allowed);
+            });
+
+            function handleFileUpload(fileInput, appointmentId = null, allowedUsers = []) {
                 const file = fileInput.files[0];
                 if (!file) return;
                 
@@ -1178,12 +1486,25 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 formData.append('file', file);
                 if (appointmentId) {
                     formData.append('appointment_id', appointmentId);
+                } else {
+                    formData.append('allowed_users', JSON.stringify(allowedUsers));
                 }
 
                 // Show uploading state
-                const originalText = appointmentId ? btnUploadAppointmentFile.textContent : uploadGlobalBtn.innerHTML;
-                if (appointmentId) btnUploadAppointmentFile.textContent = 'Lädt...';
-                else uploadGlobalBtn.textContent = 'Lädt...';
+                let originalBtnText = '';
+                let btnToRestore = null;
+                
+                if (appointmentId) {
+                    originalBtnText = btnUploadAppointmentFile.textContent;
+                    btnUploadAppointmentFile.textContent = 'Lädt...';
+                    btnUploadAppointmentFile.disabled = true;
+                    btnToRestore = btnUploadAppointmentFile;
+                } else {
+                    originalBtnText = saveUploadModalBtn.textContent;
+                    saveUploadModalBtn.textContent = 'Lädt...';
+                    saveUploadModalBtn.disabled = true;
+                    btnToRestore = saveUploadModalBtn;
+                }
 
                 fetch('files_api.php', {
                     method: 'POST',
@@ -1192,13 +1513,16 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 .then(res => res.json())
                 .then(data => {
                     fileInput.value = '';
-                    if (appointmentId) btnUploadAppointmentFile.textContent = '+ Datei anhängen';
-                    else uploadGlobalBtn.innerHTML = originalText;
+                    if (btnToRestore) {
+                        btnToRestore.textContent = originalBtnText;
+                        btnToRestore.disabled = false;
+                    }
 
                     if (data && data.success) {
                         if (appointmentId) {
                             openEditModal(appointmentId); // Refresh modal to show new file
                         } else {
+                            closeUploadModal();
                             loadGlobalFiles(); // Refresh list
                         }
                     } else {
@@ -1207,15 +1531,14 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 })
                 .catch(err => {
                     fileInput.value = '';
-                    if (appointmentId) btnUploadAppointmentFile.textContent = '+ Datei anhängen';
-                    else uploadGlobalBtn.innerHTML = originalText;
+                    if (btnToRestore) {
+                        btnToRestore.textContent = originalBtnText;
+                        btnToRestore.disabled = false;
+                    }
                     console.error('Upload Error:', err);
                     alert('Systemfehler beim Upload.');
                 });
             }
-
-            uploadGlobalBtn.addEventListener('click', () => globalFileInput.click());
-            globalFileInput.addEventListener('change', () => handleFileUpload(globalFileInput, null));
 
             btnUploadAppointmentFile.addEventListener('click', () => {
                 if (!btnUploadAppointmentFile.disabled) {
