@@ -13,6 +13,8 @@ Diese Datei dient als zentraler Einstiegspunkt für zukünftige KI-Agenten, die 
 >    * *Achtung (Sicherheitsausschluss):* Checke **keine absoluten Pfade** (wie lokale Entwicklungsordner) oder **sensible Informationen** (API-Keys, Passwörter) ein. Verwende ausschließlich relative Pfade.
 > 4. **Führe das Live-Deployment durch:** Übertrage die Änderungen zwingend auf den Live-Server. Befolge dazu die Anweisungen im Deployment-Workflow:
 >    * 👉 **[Siehe Workflow: apache-php-deploy](agent-workflow/apache-php-deploy.md)**
+>
+> **Hinweis zu dieser Datei:** Speichere **keine** Aktualisierungshinweise (wie "Letzte Aktualisierung: ...") am Ende der Datei ab. Historien-Logs gehören ausschließlich in die Git-Commits.
 
 
 > [!CAUTION]
@@ -53,8 +55,4 @@ Aus Sicherheitsgründen müssen alle neu erstellten Seiten (PHP-Dateien) im Web-
 
 Die detaillierten Implementierungsschritte, der standardisierte PHP-Codeblock sowie Hinweise zur Verifizierung sind im separaten Workflow-Dokument beschrieben:
 👉 **[Siehe Workflow: Webseiten absichern (secure-pages.md)](agent-workflow/secure-pages.md)**
-
----
-
-*Letzte Aktualisierung: 2026-06-25 von Antigravity-Agent (Rollenbasiertes Berechtigungssystem für Termine und Dateien eingeführt).*
 
