@@ -10,9 +10,10 @@ Diese Datei dient als zentraler Einstiegspunkt für zukünftige KI-Agenten, die 
 > 1. **Erstelle einen Implementierungsplan:** Dokumentiere jede geplante Änderung am Code, an der Datenbank oder an der Konfiguration im Detail in `implementation_plan.md`. Hole vor der Durchführung die explizite Freigabe des Benutzers ein.
 > 2. **Führe die Änderungen durch:** Implementiere den freigegebenen Code und verifiziere die Anpassungen.
 > 3. **Aktualisiere das Changelog:** Dokumentiere vor dem Commit alle Feature-Implementierungen auf Englisch in der [CHANGELOG.md](file:///home/tam137/git/skedulo/CHANGELOG.md). Neue Einträge gehören immer ganz oben hin und verwenden das Datum und die Uhrzeit im ISO-Stil (Format: `## [YYYY-MM-DD HH:mm]`) statt einer Versionsnummer als Identifikation.
-> 4. **Committe und pushe die Änderungen:** Führe nach erfolgreichem Test einen Git-Commit durch und pushe diesen auf das Remote-Repository. Verfasse die Commit-Nachricht kurz, knapp und auf Englisch.
+> 4. **README.md prüfen & anpassen:** Prüfe direkt nach der Aktualisierung des Changelogs, ob das neue Feature Auswirkungen auf die Nutzer-Features hat, und passe die `README.md` im Hauptverzeichnis entsprechend an. 👉 **[Siehe Workflow: readme-manage](agent-workflow/readme-manage.md)**
+> 5. **Committe und pushe die Änderungen:** Führe nach erfolgreichem Test einen Git-Commit durch und pushe diesen auf das Remote-Repository. Verfasse die Commit-Nachricht kurz, knapp und auf Englisch.
 >    * *Achtung (Sicherheitsausschluss):* Checke **keine absoluten Pfade** (wie lokale Entwicklungsordner) oder **sensible Informationen** (API-Keys, Passwörter) ein. Verwende ausschließlich relative Pfade.
-> 5. **Führe das Live-Deployment durch:** Übertrage die Änderungen zwingend auf den Live-Server. Befolge dazu die Anweisungen im Deployment-Workflow:
+> 6. **Führe das Live-Deployment durch:** Übertrage die Änderungen zwingend auf den Live-Server. Befolge dazu die Anweisungen im Deployment-Workflow:
 >    * 👉 **[Siehe Workflow: apache-php-deploy](agent-workflow/apache-php-deploy.md)**
 >
 > **Hinweis zu dieser Datei:** Speichere **keine** Aktualisierungshinweise (wie "Letzte Aktualisierung: ...") am Ende der Datei ab. Historien-Logs gehören ausschließlich in die Git-Commits.
@@ -46,6 +47,7 @@ Um wiederkehrende Aufgaben zu automatisieren und Fehler zu vermeiden, werden erl
 * **[postgres-db-manage](agent-workflow/postgres-db-manage.md):** Anleitung zum Zugriff auf PostgreSQL-Instanzen, Anlegen von Datenbanken/Tabellen und Schema-Details.
 * **[add-user](agent-workflow/add-user.md):** Anleitung zur CLI-Erstellung von Benutzerkonten für die Web-Authentifizierung.
 * **[secure-pages](agent-workflow/secure-pages.md):** Richtlinie und Codeblock zur Absicherung neu erstellter PHP-Seiten.
+* **[readme-manage](agent-workflow/readme-manage.md):** Richtlinie und Anleitung zur Strukturierung und kontinuierlichen Aktualisierung der README.md.
 * **[server-infrastructure](agent-workflow/server-infrastructure.md):** Vertrauliche Server- und Verbindungsdaten (IP, SSH, Ports, Dienste).
 
 ---
