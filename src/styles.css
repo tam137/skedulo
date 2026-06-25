@@ -1367,3 +1367,320 @@ tr:hover .file-indicator {
 .multiselect-option-text {
     flex-grow: 1;
 }
+
+/* Helper / Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.file-input-hidden {
+    display: none;
+}
+
+/* Sidebar Custom Styling overrides and additions */
+.sidebar-drawer .user-profile {
+    flex-direction: column;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 20px;
+}
+
+.sidebar-drawer .user-info {
+    margin-top: 12px;
+}
+
+.sidebar-drawer .user-info h2 {
+    font-size: 1.2rem;
+    color: #ffffff;
+}
+
+.sidebar-drawer .status-indicator {
+    margin-top: 6px;
+}
+
+.sidebar-drawer .meta-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.sidebar-drawer .meta-item {
+    padding: 12px 16px;
+}
+
+.sidebar-drawer .meta-item-value {
+    font-size: 0.95rem;
+}
+
+.sidebar-drawer .nav-menu {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 24px;
+}
+
+.sidebar-drawer .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.sidebar-drawer .nav-link.active {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar-drawer .change-pwd-btn {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.sidebar-drawer .logout-btn {
+    text-decoration: none;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+/* Dashboard Header Custom Styling */
+.dashboard-header-title-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dashboard-header .logo-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0;
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.dashboard-header .logo-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+#main-title {
+    font-size: 1.4rem;
+}
+
+/* Card Header Layout */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 12px;
+}
+
+.card-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+/* Table Empty State styling */
+.table-empty-message {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 30px;
+}
+
+.past-appointments-content .table-container {
+    border: none;
+    border-radius: 0;
+    margin-bottom: 0;
+}
+
+/* Form Styling overrides */
+.form-input-no-icon {
+    padding-left: 16px;
+}
+
+textarea.form-input {
+    padding-left: 16px;
+    min-height: 80px;
+    resize: vertical;
+    padding-top: 10px;
+}
+
+/* Modal and Footer Custom Layouts */
+.files-section {
+    margin-bottom: 24px;
+}
+
+.files-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.files-section-header label {
+    margin-bottom: 0;
+}
+
+.btn-upload-file {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.files-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+#appointment-files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.history-section {
+    margin-top: 24px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+}
+
+.modal-footer-actions {
+    display: flex;
+    gap: 12px;
+    margin-left: auto;
+}
+
+.modal-card-sm {
+    max-width: 440px;
+}
+
+.modal-card-md {
+    max-width: 460px;
+}
+
+.modal-card .alert {
+    margin-bottom: 16px;
+}
+
+.form-group-sm {
+    margin-bottom: 16px;
+}
+
+.modal-footer-compact {
+    margin-top: 0;
+    padding-top: 16px;
+}
+
+.btn-cancel:disabled,
+.btn-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Dynamic Classes from JS logic */
+.req-item.valid {
+    color: var(--success);
+}
+
+.req-item.valid .req-dot {
+    background-color: var(--success);
+    box-shadow: 0 0 6px var(--success);
+}
+
+.history-change-line.history-creation {
+    color: var(--accent-blue);
+    font-weight: 500;
+}
+
+.history-old-value {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.history-new-value {
+    color: var(--success);
+    font-weight: 500;
+}
+
+.actions-flex-container {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.action-icon-view {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.action-icon-download {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.action-btn-delete {
+    color: var(--error);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.appointment-file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.appointment-file-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.appointment-file-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.appointment-file-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.appointment-file-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding-left: 12px;
+    flex-shrink: 0;
+}
+
