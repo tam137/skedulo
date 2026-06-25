@@ -56,5 +56,5 @@ Die detaillierten Implementierungsschritte, der standardisierte PHP-Codeblock so
 
 ---
 
-*Letzte Aktualisierung: 2026-06-24 von Antigravity-Agent (Büroklammer-Symbol hinter Datum für Termine mit Dateien ergänzt).*
+*Letzte Aktualisierung: 2026-06-25 von Antigravity-Agent (Rollenbasiertes Berechtigungssystem für Termine und Dateien eingeführt).*
 
