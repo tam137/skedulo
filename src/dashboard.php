@@ -451,15 +451,26 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
             </div>
             <form id="global-file-upload-form" autocomplete="off">
                 <div class="form-group">
-                    <label class="form-label" for="global-upload-file-field">Datei auswählen</label>
-                    <input type="file" id="global-upload-file-field" class="form-input form-input-no-icon" required>
+                    <label class="form-label">Datei auswählen</label>
+                    <div class="custom-file-upload">
+                        <button type="button" class="btn-cancel" id="btn-select-global-file">Datei auswählen</button>
+                        <span id="global-file-name-display" class="file-name-display">Keine Datei ausgewählt</span>
+                    </div>
+                    <input type="file" id="global-upload-file-field" class="file-input-hidden" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Freigeben für (Zwingend erforderlich)</label>
+                    <label class="form-label" for="global-upload-appointment-field">Termin zuordnen (Optional)</label>
+                    <select id="global-upload-appointment-field" class="form-input form-input-no-icon">
+                        <option value="">Kein Termin zugeordnet</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="file-sharing-group">
+                    <label class="form-label">Freigeben für</label>
                     <div class="custom-multiselect" id="file-sharing-select">
                         <div class="multiselect-trigger">
-                            <span class="multiselect-placeholder">Bitte wähle mindestens einen Benutzer...</span>
+                            <span class="multiselect-placeholder">Niemandem freigegeben</span>
                             <span class="multiselect-arrow">▼</span>
                         </div>
                         <div class="multiselect-dropdown">

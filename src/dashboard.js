@@ -85,6 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const globalFileUploadForm = document.getElementById('global-file-upload-form');
     const globalUploadFileField = document.getElementById('global-upload-file-field');
     const saveUploadModalBtn = document.getElementById('save-upload-modal-btn');
+    const btnSelectGlobalFile = document.getElementById('btn-select-global-file');
+    const globalFileNameDisplay = document.getElementById('global-file-name-display');
+    const globalUploadAppointmentField = document.getElementById('global-upload-appointment-field');
+    const fileSharingGroup = document.getElementById('file-sharing-group');
 
     class CustomMultiSelect {
         constructor(elementId, placeholderText = 'Benutzer auswählen...') {
@@ -293,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let userList = [];
     let appointmentSharingSelect = null;
     let fileSharingSelect = null;
+    let cachedAppointments = [];
 
     function fetchUsers() {
         fetch('appointments_api.php?action=users')
@@ -303,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     appointmentSharingSelect = new CustomMultiSelect('appointment-sharing-select', 'Niemandem freigegeben');
                     appointmentSharingSelect.setUsers(userList);
                     
-                    fileSharingSelect = new CustomMultiSelect('file-sharing-select', 'Bitte wähle mindestens einen Benutzer...');
+                    fileSharingSelect = new CustomMultiSelect('file-sharing-select', 'Niemandem freigegeben');
                     fileSharingSelect.setUsers(userList);
                 }
             })
@@ -400,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert(data?.error || 'Fehler beim Laden der Termine.');
                     return;
                 }
+                cachedAppointments = data.upcoming || [];
                 renderTable(data.upcoming, 'upcoming-tbody', 'Lade Termine...', 'Keine anstehenden Termine vorhanden.');
                 renderTable(data.past, 'past-tbody', 'Lade Termine...', 'Keine vergangenen Termine vorhanden.');
             })
@@ -950,29 +956,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openUploadModal() {
         globalFileUploadForm.reset();
+        globalFileNameDisplay.textContent = 'Keine Datei ausgewählt';
         if (fileSharingSelect) {
             fileSharingSelect.clear();
         }
+        
+        // Populate the appointment dropdown with only upcoming appointments
+        globalUploadAppointmentField.innerHTML = '<option value="">Kein Termin zugeordnet</option>';
+        cachedAppointments.forEach(apt => {
+            const dateStr = formatDateOnly(apt.appointment_date);
+            const opt = document.createElement('option');
+            opt.value = apt.id;
+            opt.textContent = `Termin am ${dateStr}: ${apt.title}`;
+            globalUploadAppointmentField.appendChild(opt);
+        });
+        
+        fileSharingGroup.classList.remove('hidden');
         uploadFileModal.classList.add('active');
     }
 
     function closeUploadModal() {
         uploadFileModal.classList.remove('active');
         globalFileUploadForm.reset();
+        globalFileNameDisplay.textContent = 'Keine Datei ausgewählt';
     }
 
     uploadGlobalBtn.addEventListener('click', openUploadModal);
     closeUploadModalBtn.addEventListener('click', closeUploadModal);
     cancelUploadModalBtn.addEventListener('click', closeUploadModal);
 
+    btnSelectGlobalFile.addEventListener('click', () => {
+        globalUploadFileField.click();
+    });
+
+    globalUploadFileField.addEventListener('change', () => {
+        const file = globalUploadFileField.files[0];
+        if (file) {
+            globalFileNameDisplay.textContent = file.name;
+        } else {
+            globalFileNameDisplay.textContent = 'Keine Datei ausgewählt';
+        }
+    });
+
+    globalUploadAppointmentField.addEventListener('change', () => {
+        if (globalUploadAppointmentField.value) {
+            fileSharingGroup.classList.add('hidden');
+        } else {
+            fileSharingGroup.classList.remove('hidden');
+        }
+    });
+
     globalFileUploadForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const allowed = fileSharingSelect.getSelected();
-        if (allowed.length === 0) {
-            alert('Bitte wähle mindestens einen Benutzer aus, mit dem diese Datei geteilt werden soll.');
-            return;
+        const appointmentId = globalUploadAppointmentField.value || null;
+        let allowed = [];
+        if (!appointmentId && fileSharingSelect) {
+            allowed = fileSharingSelect.getSelected();
         }
-        handleFileUpload(globalUploadFileField, null, allowed);
+        handleFileUpload(globalUploadFileField, appointmentId, allowed);
     });
 
     function handleFileUpload(fileInput, appointmentId = null, allowedUsers = []) {
@@ -995,11 +1036,13 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('allowed_users', JSON.stringify(allowedUsers));
         }
 
+        const isGlobalUpload = uploadFileModal.classList.contains('active');
+
         // Show uploading state
         let originalBtnText = '';
         let btnToRestore = null;
         
-        if (appointmentId) {
+        if (!isGlobalUpload) {
             originalBtnText = btnUploadAppointmentFile.textContent;
             btnUploadAppointmentFile.textContent = 'Lädt...';
             btnUploadAppointmentFile.disabled = true;
@@ -1024,7 +1067,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (data && data.success) {
-                if (appointmentId) {
+                if (appointmentId && !isGlobalUpload) {
                     openEditModal(appointmentId); // Refresh modal to show new file
                 } else {
                     closeUploadModal();

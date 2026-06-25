@@ -1684,3 +1684,45 @@ textarea.form-input {
     flex-shrink: 0;
 }
 
+/* Styled custom file upload container and file name display */
+.custom-file-upload {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.file-name-display {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Premium styling for HTML select dropdown */
+select.form-input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%239ca3af' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 48px;
+    cursor: pointer;
+}
+
+select.form-input:focus {
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%236366f1' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+}
+
+select.form-input option {
+    background-color: var(--bg-secondary);
+    color: #ffffff;
+}
+
+/* Remove scrollbar from global file upload modal card */
+#upload-file-modal .modal-card {
+    overflow: visible;
+}
+
+

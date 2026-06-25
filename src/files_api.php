@@ -94,10 +94,6 @@ try {
                         }
                     }
                 }
-                
-                if (empty($allowedUsersFiltered)) {
-                    throw new Exception('Für terminfreie Dateien ist die Angabe, wer die Datei noch sehen oder löschen darf, zwingend erforderlich.');
-                }
             }
 
             $storageName = uniqid() . '_' . bin2hex(random_bytes(4)) . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $originalName);
