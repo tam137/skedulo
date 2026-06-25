@@ -56,3 +56,14 @@ Aus Sicherheitsgründen müssen alle neu erstellten Seiten (PHP-Dateien) im Web-
 Die detaillierten Implementierungsschritte, der standardisierte PHP-Codeblock sowie Hinweise zur Verifizierung sind im separaten Workflow-Dokument beschrieben:
 👉 **[Siehe Workflow: Webseiten absichern (secure-pages.md)](agent-workflow/secure-pages.md)**
 
+---
+
+## 4. Code-Architektur: Trennung von Logik, Layout und Design (Separation of Concerns)
+
+Für eine saubere Strukturierung und langfristige Wartbarkeit des Projekts gilt die strikte Richtlinie der Separation of Concerns (Trennung von Belangen). Neuer Code sowie Refaktorierungen müssen diese Trennung einhalten:
+
+1. **JavaScript-Logik:** Gehört ausschließlich in separate `.js`-Dateien (z. B. `dashboard.js`) und darf nicht inline in PHP- oder HTML-Dateien eingebettet werden.
+2. **Layout & Markup (HTML / PHP-Templates):** HTML und PHP-Strukturen verbleiben in den PHP-Dateien (z. B. `dashboard.php`). PHP sollte darin hauptsächlich für Templating-Logik, bedingte Renderings und die Einbindung der Backend-Sicherheitsprüfungen genutzt werden.
+3. **Styling & Design (CSS):** Inline-CSS (mittels `style="..."` im HTML oder direkter DOM-Modifikation `.style` in JavaScript) ist verboten. Alle Styles müssen über semantische und wiederverwendbare Klassen in der zentralen Datei `styles.css` definiert werden. Dynamische Zustandsänderungen im UI müssen in JavaScript über `.classList.add()` / `.classList.remove()` anstatt direkter CSS-Zuweisung umgesetzt werden.
+
+
