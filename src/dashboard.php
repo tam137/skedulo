@@ -441,6 +441,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 </div>
             </form>
         </div>
+    </div>
     <!-- Global File Upload Modal -->
       <div class="modal-overlay" id="upload-file-modal">
           <div class="modal-card" style="max-width: 460px;">
