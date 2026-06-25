@@ -9,9 +9,10 @@ Diese Datei dient als zentraler Einstiegspunkt für zukünftige KI-Agenten, die 
 > 
 > 1. **Erstelle einen Implementierungsplan:** Dokumentiere jede geplante Änderung am Code, an der Datenbank oder an der Konfiguration im Detail in `implementation_plan.md`. Hole vor der Durchführung die explizite Freigabe des Benutzers ein.
 > 2. **Führe die Änderungen durch:** Implementiere den freigegebenen Code und verifiziere die Anpassungen.
-> 3. **Committe und pushe die Änderungen:** Führe nach erfolgreichem Test einen Git-Commit durch und pushe diesen auf das Remote-Repository. Verfasse die Commit-Nachricht kurz, knapp und auf Englisch.
+> 3. **Aktualisiere das Changelog:** Dokumentiere vor dem Commit alle Feature-Implementierungen auf Englisch in der [CHANGELOG.md](file:///home/tam137/git/skedulo/CHANGELOG.md). Neue Einträge gehören immer ganz oben hin und verwenden das Datum und die Uhrzeit im ISO-Stil (Format: `## [YYYY-MM-DD HH:mm]`) statt einer Versionsnummer als Identifikation.
+> 4. **Committe und pushe die Änderungen:** Führe nach erfolgreichem Test einen Git-Commit durch und pushe diesen auf das Remote-Repository. Verfasse die Commit-Nachricht kurz, knapp und auf Englisch.
 >    * *Achtung (Sicherheitsausschluss):* Checke **keine absoluten Pfade** (wie lokale Entwicklungsordner) oder **sensible Informationen** (API-Keys, Passwörter) ein. Verwende ausschließlich relative Pfade.
-> 4. **Führe das Live-Deployment durch:** Übertrage die Änderungen zwingend auf den Live-Server. Befolge dazu die Anweisungen im Deployment-Workflow:
+> 5. **Führe das Live-Deployment durch:** Übertrage die Änderungen zwingend auf den Live-Server. Befolge dazu die Anweisungen im Deployment-Workflow:
 >    * 👉 **[Siehe Workflow: apache-php-deploy](agent-workflow/apache-php-deploy.md)**
 >
 > **Hinweis zu dieser Datei:** Speichere **keine** Aktualisierungshinweise (wie "Letzte Aktualisierung: ...") am Ende der Datei ab. Historien-Logs gehören ausschließlich in die Git-Commits.
