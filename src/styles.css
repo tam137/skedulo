@@ -1194,6 +1194,13 @@ tr:hover .file-indicator {
     align-items: center;
     gap: 4px;
     font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.multiselect-tag:hover {
+    transform: translateY(-1px);
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
 }
 
 .multiselect-tag-remove {
@@ -1225,15 +1232,17 @@ tr:hover .file-indicator {
     top: calc(100% + 6px);
     left: 0;
     width: 100%;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
     z-index: 1020;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 10px;
     box-sizing: border-box;
 }
@@ -1251,7 +1260,7 @@ tr:hover .file-indicator {
 .multiselect-search {
     width: 100%;
     padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     color: #ffffff;
@@ -1259,11 +1268,13 @@ tr:hover .file-indicator {
     font-size: 0.9rem;
     box-sizing: border-box;
     font-family: inherit;
+    transition: all 0.2s ease;
 }
 
 .multiselect-search:focus {
     border-color: var(--accent-indigo);
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 .multiselect-options {
@@ -1274,13 +1285,31 @@ tr:hover .file-indicator {
     gap: 4px;
 }
 
+/* Custom Scrollbar for Options */
+.multiselect-options::-webkit-scrollbar {
+    width: 6px;
+}
+
+.multiselect-options::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.multiselect-options::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.multiselect-options::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
 .multiselect-option {
     display: flex;
     align-items: center;
     padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s ease;
     user-select: none;
     font-size: 0.95rem;
     color: var(--text-primary);
@@ -1293,6 +1322,16 @@ tr:hover .file-indicator {
 .multiselect-option.selected {
     background: rgba(99, 102, 241, 0.1);
     color: var(--accent-blue);
+}
+
+.multiselect-option.no-results {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    cursor: default;
+    background: transparent !important;
+    padding: 16px 12px;
+    justify-content: center;
 }
 
 .multiselect-option-checkbox {

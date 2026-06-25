@@ -32,7 +32,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terminkalender</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=<?php echo filemtime('styles.css'); ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
 </head>
@@ -677,16 +677,20 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                     this.selectedIds = new Set(ids.map(Number));
                     this.updateOptionsUI();
                     this.updateTrigger();
+                    this.searchInput.value = '';
+                    this.filterOptions();
                 }
                 
                 clear() {
                     this.selectedIds.clear();
                     this.updateOptionsUI();
                     this.updateTrigger();
+                    this.searchInput.value = '';
+                    this.filterOptions();
                 }
                 
                 updateOptionsUI() {
-                    const options = this.optionsContainer.querySelectorAll('.multiselect-option');
+                    const options = this.optionsContainer.querySelectorAll('.multiselect-option:not(.no-results)');
                     options.forEach(opt => {
                         const id = Number(opt.dataset.id);
                         if (this.selectedIds.has(id)) {
@@ -739,15 +743,33 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 
                 filterOptions() {
                     const query = this.searchInput.value.toLowerCase().trim();
-                    const options = this.optionsContainer.querySelectorAll('.multiselect-option');
+                    const options = this.optionsContainer.querySelectorAll('.multiselect-option:not(.no-results)');
+                    let visibleCount = 0;
                     options.forEach(opt => {
                         const username = opt.querySelector('.multiselect-option-text').textContent.toLowerCase();
                         if (username.includes(query)) {
                             opt.style.display = 'flex';
+                            visibleCount++;
                         } else {
                             opt.style.display = 'none';
                         }
                     });
+                    
+                    let noResults = this.optionsContainer.querySelector('.no-results');
+                    if (visibleCount === 0) {
+                        if (!noResults) {
+                            noResults = document.createElement('div');
+                            noResults.className = 'multiselect-option no-results';
+                            noResults.style.color = 'var(--text-secondary)';
+                            noResults.style.cursor = 'default';
+                            noResults.style.justifyContent = 'center';
+                            noResults.textContent = 'Keine Benutzer gefunden';
+                            this.optionsContainer.appendChild(noResults);
+                        }
+                        noResults.style.display = 'flex';
+                    } else if (noResults) {
+                        noResults.style.display = 'none';
+                    }
                 }
                 
                 triggerEvent() {
