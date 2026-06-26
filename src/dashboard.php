@@ -10,9 +10,16 @@ if (!check_remember_me()) {
 try {
     $pdo = get_db_connection();
     // Fetch fresh user data to verify status
-    $stmt = $pdo->prepare("SELECT id, username, is_active, created_at, last_login_at FROM accounts WHERE id = :id");
+    $stmt = $pdo->prepare("SELECT id, username, is_active, created_at, last_login_at, ics_token FROM accounts WHERE id = :id");
     $stmt->execute(['id' => $_SESSION['user_id']]);
     $user = $stmt->fetch();
+
+    if ($user && empty($user['ics_token'])) {
+        $newToken = bin2hex(random_bytes(32));
+        $stmtUpdate = $pdo->prepare("UPDATE accounts SET ics_token = :token WHERE id = :id");
+        $stmtUpdate->execute(['token' => $newToken, 'id' => $_SESSION['user_id']]);
+        $user['ics_token'] = $newToken;
+    }
 
     // If user is inactive or deleted, force logout
     if (!$user || !$user['is_active']) {
@@ -82,6 +89,13 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
         </div>
 
         <div class="sidebar-footer">
+            <button id="copy-ics-btn" class="change-pwd-btn" data-token="<?php echo htmlspecialchars($user['ics_token']); ?>" style="margin-bottom: 8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                Outlook Feed Link kopieren
+            </button>
             <button id="change-pwd-btn" class="change-pwd-btn">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>

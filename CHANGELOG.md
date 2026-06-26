@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026-06-26 10:30]
+- Added Outlook Calendar (ICS) feed feature:
+  - Users can subscribe to their calendar via a secure token.
+  - Generates `.ics` format output for the past year and all future appointments.
+  - Auto-generates tokens for existing and new users upon login.
+  - Added "Outlook Feed Link kopieren" button to the sidebar.
+
 ## [2026-06-25 12:36]
 - Added changelog guideline to AGENTS.md.
 - Created and initialized CHANGELOG.md.

@@ -10,6 +10,7 @@ Willkommen bei **Skedulo**! Diese Webanwendung bietet dir eine einfache und übe
 * **Termine erstellen, bearbeiten & löschen:** Plane deine Tage ganz einfach. Du kannst einen Titel, das Datum, den Ort und ausführliche Notizen angeben.
 * **Persönliche Icons (Emojis):** Verleihe deinen Terminen eine persönliche Note, indem du ein passendes Emoji (z. B. 🌴 für Urlaub oder 💻 für Arbeit) auswählst.
 * **Vergangene Termine:** Behalte den Überblick über vergangene Ereignisse in einem einklappbaren Archiv.
+* **Kalender abonnieren (Outlook/ICS):** Du kannst deine Termine über einen sicheren Link ganz einfach in Outlook, Apple Kalender oder Google Kalender abonnieren (Nur-Lese-Zugriff).
 
 ### 🤝 Teilen & Freigabe von Terminen
 * **Zusammenarbeit:** Teile deine Termine mit anderen registrierten Nutzern. Du kannst entscheiden, wer Lese- oder Schreibrechte für deine Termine erhält.

@@ -390,6 +390,29 @@ document.addEventListener('DOMContentLoaded', () => {
     newPwdInput.addEventListener('input', validatePassword);
     confirmPwdInput.addEventListener('input', validatePassword);
 
+    // --- Copy ICS Feed Link ---
+    const copyIcsBtn = document.getElementById('copy-ics-btn');
+    if (copyIcsBtn) {
+        copyIcsBtn.addEventListener('click', () => {
+            const token = copyIcsBtn.getAttribute('data-token');
+            if (token) {
+                // Determine absolute URL based on current origin and path
+                let path = window.location.pathname;
+                let dir = path.substring(0, path.lastIndexOf('/'));
+                const url = `${window.location.origin}${dir}/calendar_feed.php?token=${token}`;
+                
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Outlook Kalender-Link wurde in die Zwischenablage kopiert!\nDu kannst ihn nun in Outlook (oder anderen Apps) abonnieren.');
+                }).catch(err => {
+                    console.error('Fehler beim Kopieren:', err);
+                    alert('Fehler beim Kopieren des Links. Bitte kopiere ihn ggf. manuell: ' + url);
+                });
+            } else {
+                alert('Dein Kalender-Token konnte nicht geladen werden. Bitte lade die Seite neu.');
+            }
+        });
+    }
+
     // --- AJAX: Load & Render Appointments ---
     function loadAppointments() {
         fetch('appointments_api.php?action=list')
