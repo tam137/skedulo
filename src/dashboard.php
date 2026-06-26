@@ -553,6 +553,14 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 <h3 class="modal-title">Datei hochladen</h3>
                 <button class="close-btn" id="close-upload-modal-btn">&times;</button>
             </div>
+            <div class="alert alert-danger hidden" id="upload-file-error-alert" style="margin: 0 24px 16px 24px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span id="upload-file-error-message"></span>
+            </div>
             <form id="global-file-upload-form" autocomplete="off">
                 <div class="form-group">
                     <label class="form-label">Datei auswählen</label>

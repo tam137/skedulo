@@ -19,6 +19,7 @@ Willkommen bei **Skedulo**! Diese Webanwendung bietet dir eine einfache und übe
 * **Terminspezifische Dateien:** Lade Dokumente, Bilder oder andere Dateien direkt in einen Termin hoch, damit du am Tag des Termins alles Wichtige sofort griffbereit hast.
 * **Globaler Datei-Upload:** Nutze den Dateimanager, um Dateien unabhängig von Terminen hochzuladen.
 * **Dateifreigabe:** Gib deine hochgeladenen Dateien für bestimmte Nutzer frei, damit auch sie darauf zugreifen können.
+* **Eigener Dateiordner & Duplikatschutz:** Deine Dateien werden sicher in deinem persönlichen Benutzerverzeichnis gespeichert. Skedulo warnt dich und verhindert den Upload, wenn eine Datei mit demselben Namen bereits von dir hochgeladen wurde.
 
 ### 🔒 Kontosicherheit & Profil
 * **Passwort ändern:** Aktualisiere dein Passwort jederzeit über dein Profil. Eine integrierte Anforderungsliste hilft dir dabei, ein sicheres Passwort zu wählen.

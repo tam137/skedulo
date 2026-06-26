@@ -103,6 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const globalFileNameDisplay = document.getElementById('global-file-name-display');
     const globalUploadAppointmentField = document.getElementById('global-upload-appointment-field');
     const fileSharingGroup = document.getElementById('file-sharing-group');
+    const uploadFileErrorAlert = document.getElementById('upload-file-error-alert');
+    const uploadFileErrorMessage = document.getElementById('upload-file-error-message');
 
     class CustomMultiSelect {
         constructor(elementId, placeholderText = 'Benutzer auswählen...') {
@@ -1046,6 +1048,12 @@ document.addEventListener('DOMContentLoaded', () => {
             fileSharingSelect.clear();
         }
         
+        // Hide error alert
+        if (uploadFileErrorAlert) {
+            uploadFileErrorAlert.classList.add('hidden');
+            uploadFileErrorMessage.textContent = '';
+        }
+        
         // Populate the appointment dropdown with only upcoming appointments
         globalUploadAppointmentField.innerHTML = '<option value="">Kein Termin zugeordnet</option>';
         cachedAppointments.forEach(apt => {
@@ -1064,6 +1072,10 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadFileModal.classList.remove('active');
         globalFileUploadForm.reset();
         globalFileNameDisplay.textContent = 'Keine Datei ausgewählt';
+        if (uploadFileErrorAlert) {
+            uploadFileErrorAlert.classList.add('hidden');
+            uploadFileErrorMessage.textContent = '';
+        }
     }
 
     uploadGlobalBtn.addEventListener('click', openUploadModal);
@@ -1152,6 +1164,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (data && data.success) {
+                if (isGlobalUpload && uploadFileErrorAlert) {
+                    uploadFileErrorAlert.classList.add('hidden');
+                    uploadFileErrorMessage.textContent = '';
+                }
                 if (appointmentId && !isGlobalUpload) {
                     openEditModal(appointmentId); // Refresh modal to show new file
                 } else {
@@ -1159,7 +1175,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadGlobalFiles(); // Refresh list
                 }
             } else {
-                alert(data?.error || 'Fehler beim Upload.');
+                const errMsg = data?.error || 'Fehler beim Upload.';
+                if (isGlobalUpload && uploadFileErrorAlert) {
+                    uploadFileErrorMessage.textContent = errMsg;
+                    uploadFileErrorAlert.classList.remove('hidden');
+                } else {
+                    alert(errMsg);
+                }
             }
         })
         .catch(err => {
@@ -1169,7 +1191,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnToRestore.disabled = false;
             }
             console.error('Upload Error:', err);
-            alert('Systemfehler beim Upload.');
+            const errMsg = 'Systemfehler beim Upload.';
+            if (isGlobalUpload && uploadFileErrorAlert) {
+                uploadFileErrorMessage.textContent = errMsg;
+                uploadFileErrorAlert.classList.remove('hidden');
+            } else {
+                alert(errMsg);
+            }
         });
     }
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026-06-26 11:24]
+- Stored user-uploaded files in user-specific subdirectories under `/var/www/html/uploads/[username]/`.
+- Prevented users from uploading duplicate files. Returns an error message if a file with the same name already exists in their subdirectory.
+- Added visual error alert inside the global upload modal for file upload errors.
+- Created and executed a database and filesystem migration script (`src/migrate_files.php`) to move existing uploaded files into their respective user subfolders and update the database accordingly.
+
 ## [2026-06-26 11:05]
 - Styled user management action buttons (Passwort zurücksetzen, Deaktivieren/Aktivieren) to align with the application design theme by making the button CSS classes global and adding a `.btn-sm` helper class.
 

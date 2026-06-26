@@ -96,8 +96,45 @@ try {
                 }
             }
 
-            $storageName = uniqid() . '_' . bin2hex(random_bytes(4)) . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $originalName);
-            $targetPath = $uploadDir . $storageName;
+            // Retrieve username of the logged-in user
+            $username = $_SESSION['username'] ?? '';
+            if (empty($username)) {
+                $stmtUser = $pdo->prepare("SELECT username FROM accounts WHERE id = :id");
+                $stmtUser->execute(['id' => $userId]);
+                $username = $stmtUser->fetchColumn() ?: '';
+            }
+            if (empty($username)) {
+                throw new Exception('Benutzername konnte nicht ermittelt werden.');
+            }
+
+            $safeUsername = preg_replace('/[^a-zA-Z0-9_-]/', '_', $username);
+            $safeOriginalName = preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $originalName);
+            $userDir = $uploadDir . $safeUsername . '/';
+
+            // Check if user directory exists, otherwise create it
+            if (!is_dir($userDir)) {
+                if (!mkdir($userDir, 0755, true)) {
+                    throw new Exception('Benutzer-Upload-Verzeichnis konnte nicht erstellt werden.');
+                }
+            }
+
+            // Check duplicate file name (both database and filesystem)
+            $stmtCheck = $pdo->prepare("
+                SELECT 1 FROM files 
+                WHERE uploaded_by = :user_id 
+                  AND (original_filename = :orig1 OR original_filename = :orig2)
+            ");
+            $stmtCheck->execute([
+                'user_id' => $userId, 
+                'orig1' => $originalName, 
+                'orig2' => $safeOriginalName
+            ]);
+            if ($stmtCheck->fetch() || file_exists($userDir . $safeOriginalName)) {
+                throw new Exception("Eine Datei mit dem Namen '" . $originalName . "' existiert bereits.");
+            }
+
+            $storageName = $safeUsername . '/' . $safeOriginalName;
+            $targetPath = $userDir . $safeOriginalName;
             
             if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
                 throw new Exception('Datei konnte nicht auf dem Server gespeichert werden.');
@@ -112,7 +149,7 @@ try {
             ");
             $stmt->execute([
                 'appointment_id' => $appointmentId,
-                'original_filename' => $originalName,
+                'original_filename' => $safeOriginalName,
                 'storage_filename' => $storageName,
                 'mime_type' => $mimeType,
                 'file_size' => $fileSize,
@@ -121,7 +158,7 @@ try {
             $fileId = $stmt->fetchColumn();
             
             if ($appointmentId) {
-                $changes = ['file_added' => ['name' => $originalName]];
+                $changes = ['file_added' => ['name' => $safeOriginalName]];
                 $stmtLog = $pdo->prepare("INSERT INTO appointment_history (appointment_id, changed_by, changes) VALUES (:app_id, :user_id, :changes)");
                 $stmtLog->execute([
                     'app_id' => $appointmentId,
