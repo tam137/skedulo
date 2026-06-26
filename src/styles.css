@@ -701,7 +701,7 @@ h1 {
     border-top: 1px solid var(--border-color);
 }
 
-.modal-footer .btn-delete {
+.btn-delete {
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.2);
     color: #fca5a5;
@@ -713,11 +713,11 @@ h1 {
     font-family: inherit;
 }
 
-.modal-footer .btn-delete:hover {
+.btn-delete:hover {
     background: rgba(239, 68, 68, 0.2);
 }
 
-.modal-footer .btn-save {
+.btn-save {
     background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
     border: none;
     color: #ffffff;
@@ -729,11 +729,11 @@ h1 {
     font-family: inherit;
 }
 
-.modal-footer .btn-save:hover {
+.btn-save:hover {
     filter: brightness(1.05);
 }
 
-.modal-footer .btn-cancel {
+.btn-cancel {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
@@ -745,9 +745,15 @@ h1 {
     font-family: inherit;
 }
 
-.modal-footer .btn-cancel:hover {
+.btn-cancel:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #ffffff;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 8px;
 }
 
 /* History Details Accordion in Modal */

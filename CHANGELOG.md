@@ -1,5 +1,8 @@
 # Changelog
 
+## [2026-06-26 11:05]
+- Styled user management action buttons (Passwort zurücksetzen, Deaktivieren/Aktivieren) to align with the application design theme by making the button CSS classes global and adding a `.btn-sm` helper class.
+
 ## [2026-06-26 11:00]
 - Fixed issue where the Admin Area button was hidden for admin users due to missing 'role' column in user SELECT query.
 
