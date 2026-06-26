@@ -34,9 +34,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // View Management
     const navCalendar = document.getElementById('nav-calendar');
     const navFiles = document.getElementById('nav-files');
+    const navAdmin = document.getElementById('nav-admin');
     const calendarView = document.getElementById('calendar-view');
     const filesView = document.getElementById('files-view');
+    const adminView = document.getElementById('admin-view');
     const mainTitle = document.getElementById('main-title');
+
+    // Admin Elements
+    const usersTbody = document.getElementById('users-tbody');
+    const addUserBtn = document.getElementById('add-user-btn');
+    const addUserModal = document.getElementById('add-user-modal');
+    const closeAddUserModalBtn = document.getElementById('close-add-user-modal-btn');
+    const cancelAddUserModalBtn = document.getElementById('cancel-add-user-modal-btn');
+    const addUserForm = document.getElementById('add-user-form');
+    const newUsernameInput = document.getElementById('new-username');
+    const newRoleInput = document.getElementById('new-role');
+    const addUserErrorAlert = document.getElementById('add-user-error-alert');
+    const addUserErrorMessage = document.getElementById('add-user-error-message');
 
     // Files Elements
     const uploadGlobalBtn = document.getElementById('upload-global-file-btn');
@@ -692,7 +706,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function hideConfirmOverlay() {
         currentDeleteId = null;
+        if (typeof adminActionType !== 'undefined') adminActionType = null;
+        if (typeof currentAdminActionUserId !== 'undefined') currentAdminActionUserId = null;
         confirmOverlay.classList.remove('active');
+        // Reset texts for appointment deletion as default
+        document.querySelector('#confirm-overlay h3').textContent = 'Termin löschen?';
+        document.querySelector('#confirm-overlay p').textContent = 'Bist du sicher, dass du diesen Termin dauerhaft löschen möchtest?';
     }
 
     // Event Listeners for UI
@@ -725,6 +744,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hideConfirmOverlay();
             closeSidebar();
             closePwdModal();
+            if (typeof closeAddUserModal === 'function') closeAddUserModal();
             if (typeof closeUploadModal === 'function') {
                 closeUploadModal();
             }
@@ -775,6 +795,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Confirm Delete Action ---
     confirmDeleteBtn.addEventListener('click', () => {
+        if (typeof adminActionType !== 'undefined' && adminActionType) {
+            fetch('admin_api.php?action=' + adminActionType, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: currentAdminActionUserId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success) {
+                    hideConfirmOverlay();
+                    loadUsersAdmin();
+                } else {
+                    alert(data?.error || 'Fehler beim Ausführen der Aktion.');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Systemfehler.');
+            });
+            return;
+        }
+
         if (!currentDeleteId) return;
 
         fetch('appointments_api.php', {
@@ -854,8 +896,10 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         navCalendar.classList.add('active');
         navFiles.classList.remove('active');
+        if (navAdmin) navAdmin.classList.remove('active');
         
         filesView.classList.add('hidden');
+        if (adminView) adminView.classList.add('hidden');
         calendarView.classList.remove('hidden');
         mainTitle.textContent = 'Kalender';
         closeSidebar();
@@ -866,13 +910,31 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         navFiles.classList.add('active');
         navCalendar.classList.remove('active');
+        if (navAdmin) navAdmin.classList.remove('active');
         
         calendarView.classList.add('hidden');
+        if (adminView) adminView.classList.add('hidden');
         filesView.classList.remove('hidden');
         mainTitle.textContent = 'Dateien';
         closeSidebar();
         loadGlobalFiles();
     });
+
+    if (navAdmin) {
+        navAdmin.addEventListener('click', (e) => {
+            e.preventDefault();
+            navAdmin.classList.add('active');
+            navCalendar.classList.remove('active');
+            navFiles.classList.remove('active');
+            
+            calendarView.classList.add('hidden');
+            filesView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            mainTitle.textContent = 'Benutzerverwaltung';
+            closeSidebar();
+            loadUsersAdmin();
+        });
+    }
 
     function formatBytes(bytes, decimals = 2) {
         if (!+bytes) return '0 Bytes';
@@ -1121,4 +1183,123 @@ document.addEventListener('DOMContentLoaded', () => {
         if (appId) handleFileUpload(appointmentFileInput, appId);
     });
 
+    // --- ADMIN LOGIC ---
+    let adminActionType = null; // 'deactivate_user', 'activate_user', 'reset_password'
+    let currentAdminActionUserId = null;
+
+    function loadUsersAdmin() {
+        if (!usersTbody) return;
+        fetch('admin_api.php?action=list_users')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success) {
+                    renderUsersAdmin(data.users);
+                } else {
+                    usersTbody.innerHTML = `<tr><td colspan="5" class="table-empty-message" style="color:red;">Fehler beim Laden.</td></tr>`;
+                }
+            })
+            .catch(err => console.error('Error fetching admin users:', err));
+    }
+
+    function renderUsersAdmin(users) {
+        usersTbody.innerHTML = '';
+        if (users.length === 0) {
+            usersTbody.innerHTML = `<tr><td colspan="5" class="table-empty-message">Keine Benutzer vorhanden.</td></tr>`;
+            return;
+        }
+
+        users.forEach(u => {
+            const tr = document.createElement('tr');
+            
+            const nameEscaped = escapeHtml(u.username);
+            const roleStr = u.role === 'admin' ? 'Admin' : 'User';
+            const statusDot = u.is_active 
+                ? '<span class="status-dot" style="background:var(--success-color)"></span> Aktiv' 
+                : '<span class="status-dot" style="background:var(--error-color)"></span> Inaktiv';
+            
+            let loginStr = '-';
+            if (u.last_login_at) {
+                loginStr = formatDateSimple(u.last_login_at);
+            }
+
+            let actionsHtml = `<div class="action-buttons" style="display:flex; justify-content:flex-end; gap:8px;">
+                <button class="btn-cancel btn-sm" onclick="promptResetPassword(${u.id})">Passwort zurücksetzen</button>
+            `;
+            if (u.is_active) {
+                actionsHtml += `<button class="btn-delete btn-sm" onclick="promptToggleActive(${u.id}, false)">Deaktivieren</button>`;
+            } else {
+                actionsHtml += `<button class="btn-save btn-sm" onclick="promptToggleActive(${u.id}, true)">Aktivieren</button>`;
+            }
+            actionsHtml += `</div>`;
+
+            tr.innerHTML = `
+                <td data-label="Benutzername"><strong>${nameEscaped}</strong></td>
+                <td data-label="Rolle">${roleStr}</td>
+                <td data-label="Status">${statusDot}</td>
+                <td data-label="Letzter Login">${loginStr}</td>
+                <td data-label="Aktionen" class="text-right">${actionsHtml}</td>
+            `;
+            usersTbody.appendChild(tr);
+        });
+    }
+
+    window.promptResetPassword = function(id) {
+        adminActionType = 'reset_password';
+        currentAdminActionUserId = id;
+        document.querySelector('#confirm-overlay h3').textContent = 'Passwort zurücksetzen?';
+        document.querySelector('#confirm-overlay p').textContent = 'Das Passwort dieses Benutzers wird auf "Start123!" zurückgesetzt. Möchtest du fortfahren?';
+        confirmOverlay.classList.add('active');
+    };
+
+    window.promptToggleActive = function(id, activate) {
+        adminActionType = activate ? 'activate_user' : 'deactivate_user';
+        currentAdminActionUserId = id;
+        document.querySelector('#confirm-overlay h3').textContent = activate ? 'Benutzer aktivieren?' : 'Benutzer deaktivieren?';
+        document.querySelector('#confirm-overlay p').textContent = activate ? 'Der Benutzer kann sich danach wieder anmelden.' : 'Der Benutzer wird sofort abgemeldet und kann sich nicht mehr einloggen. Termine und Dateien bleiben erhalten.';
+        confirmOverlay.classList.add('active');
+    };
+
+    if (addUserBtn) {
+        addUserBtn.addEventListener('click', () => {
+            addUserForm.reset();
+            addUserErrorAlert.classList.add('hidden');
+            addUserModal.classList.add('active');
+        });
+
+        window.closeAddUserModal = function() {
+            addUserModal.classList.remove('active');
+        };
+
+        closeAddUserModalBtn.addEventListener('click', closeAddUserModal);
+        cancelAddUserModalBtn.addEventListener('click', closeAddUserModal);
+
+        addUserForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = newUsernameInput.value.trim();
+            const role = newRoleInput.value;
+
+            if (!username) return;
+
+            fetch('admin_api.php?action=add_user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, role })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success) {
+                    closeAddUserModal();
+                    loadUsersAdmin();
+                } else {
+                    addUserErrorMessage.textContent = data.error || 'Fehler beim Erstellen.';
+                    addUserErrorAlert.classList.remove('hidden');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                addUserErrorMessage.textContent = 'Systemfehler.';
+                addUserErrorAlert.classList.remove('hidden');
+            });
+        });
+    }
 });

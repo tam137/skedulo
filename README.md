@@ -23,3 +23,8 @@ Willkommen bei **Skedulo**! Diese Webanwendung bietet dir eine einfache und übe
 ### 🔒 Kontosicherheit & Profil
 * **Passwort ändern:** Aktualisiere dein Passwort jederzeit über dein Profil. Eine integrierte Anforderungsliste hilft dir dabei, ein sicheres Passwort zu wählen.
 * **Remember-Me Option:** Bleibe auf deinem Gerät sicher angemeldet, ohne dich jedes Mal neu einloggen zu müssen.
+
+### 🛡️ Administration (Nur für Admins)
+* **Benutzerverwaltung:** Admins haben Zugriff auf ein dediziertes Administrations-Panel.
+* **Nutzerkontrolle:** Erstelle neue Benutzer, deaktiviere bestehende oder setze Passwörter bei Bedarf auf den Standardwert zurück.
+* **Aktivitäts-Status:** Behalte den letzten Login aller Nutzer im Blick.

@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026-06-26 10:52]
+- Added Admin Area for managing users.
+  - Visible only to users with the 'admin' role.
+  - View all users with their roles, statuses, and last login times.
+  - Add new users directly from the UI with a default password 'Start123!'.
+  - Deactivate/Reactivate users.
+  - Reset a user's password to the default.
+
 ## [2026-06-26 10:30]
 - Added Outlook Calendar (ICS) feed feature:
   - Users can subscribe to their calendar via a secure token.

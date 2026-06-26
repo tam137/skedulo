@@ -86,6 +86,14 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
                 Dateiverwaltung
             </a>
+            <?php if ($user['role'] === 'admin'): ?>
+            <a href="#" class="nav-link" id="nav-admin">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                Admin-Bereich
+            </a>
+            <?php endif; ?>
         </div>
 
         <div class="sidebar-footer">
@@ -235,6 +243,45 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 </table>
             </div>
         </div>
+
+        <!-- Admin Content -->
+        <?php if ($user['role'] === 'admin'): ?>
+        <div id="admin-view" class="dashboard-card hidden">
+            <div class="card-header">
+                <h2>Benutzerverwaltung</h2>
+                <button class="add-btn" id="add-user-btn">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                    Neuer Benutzer
+                </button>
+            </div>
+            
+            <div class="table-container">
+                <table class="appointments-table" id="users-table">
+                    <thead>
+                        <tr>
+                            <th>Benutzername</th>
+                            <th>Rolle</th>
+                            <th>Status</th>
+                            <th>Letzter Login</th>
+                            <th class="text-right">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody">
+                        <tr>
+                            <td colspan="5" class="table-empty-message">
+                                Lade Benutzer...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 
     <!-- Appointment Modal (Create / Edit) -->
@@ -358,6 +405,49 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 <button class="btn-confirm-cancel" id="confirm-cancel-btn">Abbrechen</button>
                 <button class="btn-confirm-delete" id="confirm-delete-btn">Ja, löschen</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal-overlay" id="add-user-modal">
+        <div class="modal-card modal-card-sm">
+            <div class="modal-header">
+                <h3 class="modal-title">Benutzer hinzufügen</h3>
+                <button class="close-btn" id="close-add-user-modal-btn">&times;</button>
+            </div>
+            
+            <div class="alert alert-danger hidden" id="add-user-error-alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span id="add-user-error-message"></span>
+            </div>
+
+            <form id="add-user-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="new-username" class="form-label">Benutzername</label>
+                    <input type="text" id="new-username" name="username" class="form-input form-input-no-icon" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="new-role" class="form-label">Rolle</label>
+                    <select id="new-role" name="role" class="form-input form-input-no-icon" required>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <div class="files-hint" style="margin-top: 10px; margin-bottom: 0; display: block;">
+                    Das Startpasswort wird automatisch auf <strong>Start123!</strong> gesetzt.
+                </div>
+
+                <div class="modal-footer modal-footer-compact">
+                    <button type="button" class="btn-cancel" id="cancel-add-user-modal-btn">Abbrechen</button>
+                    <button type="submit" class="btn-save" id="save-add-user-btn">Speichern</button>
+                </div>
+            </form>
         </div>
     </div>
 
