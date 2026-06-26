@@ -1,5 +1,14 @@
 # Changelog
 
+## [2026-06-26 18:43]
+- Made file rows in the file management area clickable, allowing users to open the file edit dialog by clicking anywhere on the row.
+
+## [2026-06-26 18:41]
+- Added ability to change file associations and visibility:
+  - Users can now edit an uploaded file to change its associated appointment or explicit user permissions via the new "Bearbeiten" (✏️) button.
+  - Appointments listed in the "Termin zuordnen" dropdown now only show upcoming appointments and appointments from the past 30 days (configurable via `past_appointments_days_limit` in `config.php`).
+  - When assigning a file to an appointment, any previously set explicit user permissions are wiped, making the file strictly bound to the appointment's visibility.
+
 ## [2026-06-26 18:34]
 - Added brand-aligned favicons to the web application:
   - Created `src/favicon.svg` with a white padlock matching the main logo on a modern HSL diagonal gradient background.

@@ -106,6 +106,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadFileErrorAlert = document.getElementById('upload-file-error-alert');
     const uploadFileErrorMessage = document.getElementById('upload-file-error-message');
 
+    // Edit File Modal Elements
+    const editFileModal = document.getElementById('edit-file-modal');
+    const closeEditModalBtn = document.getElementById('close-edit-modal-btn');
+    const cancelEditModalBtn = document.getElementById('cancel-edit-modal-btn');
+    const editFileForm = document.getElementById('edit-file-form');
+    const editFileId = document.getElementById('edit-file-id');
+    const editFileNameDisplay = document.getElementById('edit-file-name-display');
+    const editAppointmentField = document.getElementById('edit-appointment-field');
+    const editFileSharingGroup = document.getElementById('edit-file-sharing-group');
+    const editFileErrorAlert = document.getElementById('edit-file-error-alert');
+    const editFileErrorMessage = document.getElementById('edit-file-error-message');
+
     class CustomMultiSelect {
         constructor(elementId, placeholderText = 'Benutzer auswählen...') {
             this.container = document.getElementById(elementId);
@@ -313,6 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let userList = [];
     let appointmentSharingSelect = null;
     let fileSharingSelect = null;
+    let editFileSharingSelect = null;
     let cachedAppointments = [];
 
     function fetchUsers() {
@@ -326,6 +339,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     fileSharingSelect = new CustomMultiSelect('file-sharing-select', 'Niemandem freigegeben');
                     fileSharingSelect.setUsers(userList);
+
+                    editFileSharingSelect = new CustomMultiSelect('edit-file-sharing-select', 'Niemandem freigegeben');
+                    editFileSharingSelect.setUsers(userList);
                 }
             })
             .catch(err => console.error('Error fetching users:', err));
@@ -975,6 +991,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="actions-flex-container">
                     ${isViewable ? `<a href="files_api.php?action=view&id=${f.id}" target="_blank" class="action-icon action-icon-view" title="Ansehen">👁️</a>` : ''}
                     <a href="files_api.php?action=download&id=${f.id}" class="action-icon action-icon-download" title="Herunterladen">⬇️</a>
+                    <button onclick="openEditFileModal(${f.id})" class="action-icon action-btn-edit" title="Bearbeiten">✏️</button>
                     <button onclick="deleteFile(${f.id}, null)" class="action-icon action-btn-delete" title="Löschen">🗑️</button>
                 </div>
             `;
@@ -986,6 +1003,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td data-label="Datum">${formatDateOnly(f.uploaded_at)}</td>
                 <td data-label="Aktionen">${actionsHtml}</td>
             `;
+
+            tr.addEventListener('click', (e) => {
+                if (e.target.closest('a') || e.target.closest('button')) return;
+                openEditFileModal(f.id);
+            });
+
             filesTbody.appendChild(tr);
         });
     }
@@ -1011,12 +1034,137 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="appointment-file-actions">
                     ${isViewable ? `<a href="files_api.php?action=view&id=${f.id}" target="_blank" class="action-icon-view" title="Ansehen">👁️</a>` : ''}
                     <a href="files_api.php?action=download&id=${f.id}" class="action-icon-download" title="Herunterladen">⬇️</a>
+                    <button type="button" onclick="openEditFileModal(${f.id}, ${appointmentId})" class="action-btn-edit" title="Bearbeiten">✏️</button>
                     <button type="button" onclick="deleteFile(${f.id}, ${appointmentId})" class="action-btn-delete" title="Löschen">🗑️</button>
                 </div>
             `;
             appointmentFilesList.appendChild(div);
         });
     }
+
+    window.openEditFileModal = function(fileId, fromAppointmentId = null) {
+        if (editFileErrorAlert) {
+            editFileErrorAlert.classList.add('hidden');
+            editFileErrorMessage.textContent = '';
+        }
+        
+        fetch(`files_api.php?action=get&id=${fileId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success) {
+                    const file = data.file;
+                    editFileId.value = file.id;
+                    editFileNameDisplay.textContent = file.original_filename;
+                    
+                    // Populate appointment dropdown
+                    editAppointmentField.innerHTML = '<option value="">Kein Termin zugeordnet</option>';
+                    cachedAppointments.forEach(apt => {
+                        const dateStr = formatDateOnly(apt.appointment_date);
+                        const opt = document.createElement('option');
+                        opt.value = apt.id;
+                        opt.textContent = `Termin am ${dateStr}: ${apt.title}`;
+                        editAppointmentField.appendChild(opt);
+                    });
+                    
+                    if (file.appointment_id) {
+                        editAppointmentField.value = file.appointment_id;
+                        editFileSharingGroup.classList.add('hidden');
+                    } else {
+                        editAppointmentField.value = '';
+                        editFileSharingGroup.classList.remove('hidden');
+                    }
+                    
+                    if (editFileSharingSelect) {
+                        editFileSharingSelect.setSelected(file.allowed_users || []);
+                    }
+                    
+                    // We might need to remember if we opened from an appointment modal
+                    editFileModal.dataset.fromAppointment = fromAppointmentId || '';
+                    
+                    editFileModal.classList.add('active');
+                } else {
+                    alert(data?.error || 'Fehler beim Laden der Dateidetails.');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Systemfehler beim Laden.');
+            });
+    };
+
+    function closeEditFileModal() {
+        editFileModal.classList.remove('active');
+        editFileForm.reset();
+        editFileNameDisplay.textContent = '';
+        if (editFileErrorAlert) {
+            editFileErrorAlert.classList.add('hidden');
+            editFileErrorMessage.textContent = '';
+        }
+    }
+
+    closeEditModalBtn.addEventListener('click', closeEditFileModal);
+    cancelEditModalBtn.addEventListener('click', closeEditFileModal);
+
+    editAppointmentField.addEventListener('change', () => {
+        if (editAppointmentField.value) {
+            editFileSharingGroup.classList.add('hidden');
+        } else {
+            editFileSharingGroup.classList.remove('hidden');
+        }
+    });
+
+    editFileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const appointmentId = editAppointmentField.value || null;
+        let allowedUsers = [];
+        if (!appointmentId && editFileSharingSelect) {
+            allowedUsers = editFileSharingSelect.getSelected();
+        }
+        
+        const payload = {
+            action: 'update',
+            id: parseInt(editFileId.value, 10),
+            appointment_id: appointmentId,
+            allowed_users: allowedUsers
+        };
+
+        const saveBtn = document.getElementById('save-edit-modal-btn');
+        const originalBtnText = saveBtn.textContent;
+        saveBtn.textContent = 'Speichert...';
+        saveBtn.disabled = true;
+
+        fetch('files_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            saveBtn.textContent = originalBtnText;
+            saveBtn.disabled = false;
+            
+            if (data && data.success) {
+                closeEditFileModal();
+                
+                const fromAppointmentId = editFileModal.dataset.fromAppointment;
+                if (fromAppointmentId) {
+                    openEditModal(fromAppointmentId); // refresh appointment modal
+                } else {
+                    loadGlobalFiles(); // refresh global file list
+                }
+            } else {
+                editFileErrorMessage.textContent = data?.error || 'Fehler beim Speichern.';
+                editFileErrorAlert.classList.remove('hidden');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            saveBtn.textContent = originalBtnText;
+            saveBtn.disabled = false;
+            editFileErrorMessage.textContent = 'Systemfehler beim Speichern.';
+            editFileErrorAlert.classList.remove('hidden');
+        });
+    });
 
     window.deleteFile = function(fileId, appointmentId) {
         if (!confirm('Möchtest du diese Datei wirklich löschen?')) return;
