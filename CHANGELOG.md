@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026-06-26 18:34]
+- Added brand-aligned favicons to the web application:
+  - Created `src/favicon.svg` with a white padlock matching the main logo on a modern HSL diagonal gradient background.
+  - Generated high-quality `src/favicon.png` and a multi-resolution `src/favicon.ico` (16x16, 32x32, 48x48, 256x256) via Pillow.
+  - Linked the SVG and PNG favicons in `src/login.php` and `src/dashboard.php`.
+
 ## [2026-06-26 11:48]
 - Prepared repository for Open Source release:
   - Added `config.php` to `.gitignore` to prevent accidental credential commits.
