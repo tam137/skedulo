@@ -55,25 +55,6 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
             </div>
             <div class="user-info">
                 <h2>Hallo, <?php echo htmlspecialchars($user['username']); ?>!</h2>
-                <div class="status-indicator">
-                    <span class="status-dot"></span>
-                    Konto aktiv
-                </div>
-            </div>
-        </div>
-        
-        <div class="meta-grid">
-            <div class="meta-item">
-                <div class="meta-item-label">Letzter Login</div>
-                <div class="meta-item-value">
-                    <?php 
-                    if ($user['last_login_at']) {
-                        echo date('d.m.Y H:i', strtotime($user['last_login_at']));
-                    } else {
-                        echo 'Jetzt';
-                    }
-                    ?>
-                </div>
             </div>
         </div>
 

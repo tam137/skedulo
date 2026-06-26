@@ -1,5 +1,8 @@
 # Changelog
 
+## [2026-06-26 11:45]
+- Removed "Konto aktiv" (account status) and "Letzter Login" (last login timestamp) information from the sidebar drawer (hamburger menu).
+
 ## [2026-06-26 11:37]
 - Fixed critical security vulnerability (RCE) by strictly validating uploaded file extensions via a blacklist and blocking system files (e.g. `.htaccess`).
 - Reintroduced random hashing to physical file names on the server to prevent predictable file paths.
