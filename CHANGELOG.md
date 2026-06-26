@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026-06-26 11:37]
+- Fixed critical security vulnerability (RCE) by strictly validating uploaded file extensions via a blacklist and blocking system files (e.g. `.htaccess`).
+- Reintroduced random hashing to physical file names on the server to prevent predictable file paths.
+- Preserved the true original filename in the database (including spaces) to improve UX during file downloads.
+- Fixed a file migration bug where physical files and the database could get out of sync upon a failure. Created `src/secure_existing_files.php` and secured all existing uploads on the live server.
+
 ## [2026-06-26 11:24]
 - Stored user-uploaded files in user-specific subdirectories under `/var/www/html/uploads/[username]/`.
 - Prevented users from uploading duplicate files. Returns an error message if a file with the same name already exists in their subdirectory.

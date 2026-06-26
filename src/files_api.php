@@ -48,6 +48,19 @@ try {
             }
             
             $originalName = basename($file['name']);
+            
+            // Check for hidden or system files
+            if (strpos($originalName, '.') === 0) {
+                throw new Exception("Versteckte Dateien oder Systemdateien sind nicht erlaubt.");
+            }
+            
+            // Validate against dangerous extensions
+            $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+            $blockedExtensions = ['php', 'php3', 'php4', 'php5', 'phtml', 'phar', 'exe', 'sh', 'cgi', 'pl', 'jsp', 'asp', 'aspx', 'htm', 'html', 'js', 'svg'];
+            if (in_array($ext, $blockedExtensions)) {
+                throw new Exception("Dateien dieses Typs sind aus Sicherheitsgründen nicht erlaubt.");
+            }
+            
             $mimeType = $file['type'];
             if (empty($mimeType)) {
                 $mimeType = mime_content_type($file['tmp_name']) ?: 'application/octet-stream';
@@ -118,65 +131,71 @@ try {
                 }
             }
 
-            // Check duplicate file name (both database and filesystem)
+            // Check duplicate file name in database
             $stmtCheck = $pdo->prepare("
                 SELECT 1 FROM files 
                 WHERE uploaded_by = :user_id 
-                  AND (original_filename = :orig1 OR original_filename = :orig2)
+                  AND original_filename = :orig1
             ");
             $stmtCheck->execute([
                 'user_id' => $userId, 
-                'orig1' => $originalName, 
-                'orig2' => $safeOriginalName
+                'orig1' => $originalName
             ]);
-            if ($stmtCheck->fetch() || file_exists($userDir . $safeOriginalName)) {
+            if ($stmtCheck->fetch()) {
                 throw new Exception("Eine Datei mit dem Namen '" . $originalName . "' existiert bereits.");
             }
 
-            $storageName = $safeUsername . '/' . $safeOriginalName;
-            $targetPath = $userDir . $safeOriginalName;
+            $storageName = $safeUsername . '/' . uniqid() . '_' . bin2hex(random_bytes(4)) . '_' . $safeOriginalName;
+            $targetPath = $uploadDir . $storageName;
             
             if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
                 throw new Exception('Datei konnte nicht auf dem Server gespeichert werden.');
             }
             
             $pdo->beginTransaction();
-
-            $stmt = $pdo->prepare("
-                INSERT INTO files (appointment_id, original_filename, storage_filename, mime_type, file_size, uploaded_by)
-                VALUES (:appointment_id, :original_filename, :storage_filename, :mime_type, :file_size, :uploaded_by)
-                RETURNING id
-            ");
-            $stmt->execute([
-                'appointment_id' => $appointmentId,
-                'original_filename' => $safeOriginalName,
-                'storage_filename' => $storageName,
-                'mime_type' => $mimeType,
-                'file_size' => $fileSize,
-                'uploaded_by' => $userId
-            ]);
-            $fileId = $stmt->fetchColumn();
-            
-            if ($appointmentId) {
-                $changes = ['file_added' => ['name' => $safeOriginalName]];
-                $stmtLog = $pdo->prepare("INSERT INTO appointment_history (appointment_id, changed_by, changes) VALUES (:app_id, :user_id, :changes)");
-                $stmtLog->execute([
-                    'app_id' => $appointmentId,
-                    'user_id' => $userId,
-                    'changes' => json_encode($changes)
+            try {
+                $stmt = $pdo->prepare("
+                    INSERT INTO files (appointment_id, original_filename, storage_filename, mime_type, file_size, uploaded_by)
+                    VALUES (:appointment_id, :original_filename, :storage_filename, :mime_type, :file_size, :uploaded_by)
+                    RETURNING id
+                ");
+                $stmt->execute([
+                    'appointment_id' => $appointmentId,
+                    'original_filename' => $originalName,
+                    'storage_filename' => $storageName,
+                    'mime_type' => $mimeType,
+                    'file_size' => $fileSize,
+                    'uploaded_by' => $userId
                 ]);
-            } else {
-                // Insert file sharing permissions
-                $stmtPerm = $pdo->prepare("INSERT INTO file_permissions (file_id, account_id) VALUES (:file_id, :account_id)");
-                foreach ($allowedUsersFiltered as $allowedUserId) {
-                    $stmtPerm->execute([
-                        'file_id' => $fileId,
-                        'account_id' => $allowedUserId
+                $fileId = $stmt->fetchColumn();
+                
+                if ($appointmentId) {
+                    $changes = ['file_added' => ['name' => $originalName]];
+                    $stmtLog = $pdo->prepare("INSERT INTO appointment_history (appointment_id, changed_by, changes) VALUES (:app_id, :user_id, :changes)");
+                    $stmtLog->execute([
+                        'app_id' => $appointmentId,
+                        'user_id' => $userId,
+                        'changes' => json_encode($changes)
                     ]);
+                } else {
+                    // Insert file sharing permissions
+                    $stmtPerm = $pdo->prepare("INSERT INTO file_permissions (file_id, account_id) VALUES (:file_id, :account_id)");
+                    foreach ($allowedUsersFiltered as $allowedUserId) {
+                        $stmtPerm->execute([
+                            'file_id' => $fileId,
+                            'account_id' => $allowedUserId
+                        ]);
+                    }
                 }
+                
+                $pdo->commit();
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                if (file_exists($targetPath)) {
+                    unlink($targetPath);
+                }
+                throw $e;
             }
-            
-            $pdo->commit();
 
             echo json_encode([
                 'success' => true,
