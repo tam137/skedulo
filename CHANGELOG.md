@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026-06-26 20:29]
+- Added tab persistence to the dashboard:
+  - Stored the active view state (Calendar, Files, or Admin Area) in the browser's `sessionStorage`.
+  - Refactored the dashboard navigation to use a unified `switchView` helper function.
+  - Automatically restored the user's previously active tab on page reload (F5) or initial page load, with safety checks to ensure non-admin users cannot access the Admin Area.
+
 ## [2026-06-26 18:43]
 - Made file rows in the file management area clickable, allowing users to open the file edit dialog by clicking anywhere on the row.
 

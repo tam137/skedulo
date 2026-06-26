@@ -1653,6 +1653,13 @@ textarea.form-input {
     cursor: pointer;
 }
 
+.action-btn-edit {
+    color: var(--accent-indigo);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
 .appointment-file-item {
     display: flex;
     justify-content: space-between;
@@ -1727,7 +1734,8 @@ select.form-input option {
 }
 
 /* Remove scrollbar from global file upload modal card */
-#upload-file-modal .modal-card {
+#upload-file-modal .modal-card,
+#edit-file-modal .modal-card {
     overflow: visible;
 }
 

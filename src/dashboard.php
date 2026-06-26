@@ -587,6 +587,61 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
         </div>
     </div>
 
+    <!-- Edit File Modal -->
+    <div class="modal-overlay" id="edit-file-modal">
+        <div class="modal-card modal-card-md">
+            <div class="modal-header">
+                <h3 class="modal-title">Datei bearbeiten</h3>
+                <button class="close-btn" id="close-edit-modal-btn">&times;</button>
+            </div>
+            <div class="alert alert-danger hidden" id="edit-file-error-alert" style="margin: 0 24px 16px 24px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span id="edit-file-error-message"></span>
+            </div>
+            <form id="edit-file-form" autocomplete="off">
+                <input type="hidden" id="edit-file-id">
+                <div class="form-group">
+                    <label class="form-label">Dateiname</label>
+                    <div class="file-name-display" id="edit-file-name-display" style="margin-top: 0;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="edit-appointment-field">Termin zuordnen</label>
+                    <select id="edit-appointment-field" class="form-input form-input-no-icon">
+                        <option value="">Kein Termin zugeordnet</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="edit-file-sharing-group">
+                    <label class="form-label">Freigeben für</label>
+                    <div class="custom-multiselect" id="edit-file-sharing-select">
+                        <div class="multiselect-trigger">
+                            <span class="multiselect-placeholder">Niemandem freigegeben</span>
+                            <span class="multiselect-arrow">▼</span>
+                        </div>
+                        <div class="multiselect-dropdown">
+                            <div class="multiselect-search-container">
+                                <input type="text" class="multiselect-search" placeholder="Benutzer suchen...">
+                            </div>
+                            <div class="multiselect-options">
+                                <!-- Options will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer modal-footer-compact">
+                    <button type="button" class="btn-cancel" id="cancel-edit-modal-btn">Abbrechen</button>
+                    <button type="submit" class="btn-save" id="save-edit-modal-btn">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Flatpickr Library -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/de.js"></script>

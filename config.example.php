@@ -8,6 +8,7 @@ $db_config = [
     'port' => '5433',          // Database port (default PostgreSQL port is 5432, this project uses 5433)
     'dbname' => 'your_dbname',  // Name of the database
     'user' => 'your_dbuser',    // Username for database access
-    'password' => 'your_secure_password' // Password for the database user
+    'password' => 'your_secure_password', // Password for the database user
+    'past_appointments_days_limit' => 30 // Vergangene Termine nur bis zu X Tagen in der Vergangenheit laden
 ];
 ?>

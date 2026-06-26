@@ -32,6 +32,9 @@ try {
 
         case 'list':
             $today = date('Y-m-d');
+            global $db_config;
+            $pastDaysLimit = $db_config['past_appointments_days_limit'] ?? 30;
+            $limitDate = date('Y-m-d', strtotime("-$pastDaysLimit days"));
 
             // Fetch upcoming appointments (next first: ASC)
             $stmt = $pdo->prepare("
@@ -59,6 +62,7 @@ try {
                 FROM appointments a
                 JOIN accounts acc ON a.created_by = acc.id
                 WHERE a.appointment_date < :today
+                  AND a.appointment_date >= :limitDate
                   AND (
                       a.created_by = :userId
                       OR EXISTS (
@@ -68,7 +72,7 @@ try {
                   )
                 ORDER BY a.appointment_date DESC
             ");
-            $stmt->execute(['today' => $today, 'userId' => $userId]);
+            $stmt->execute(['today' => $today, 'limitDate' => $limitDate, 'userId' => $userId]);
             $past = $stmt->fetchAll();
 
             echo json_encode([

@@ -34,3 +34,4 @@ temp/
 # Symlinks and ignored directories
 agent-workflow
 deploy.sh
+todo.md

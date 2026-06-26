@@ -204,6 +204,67 @@ try {
             ]);
             break;
             
+        case 'get':
+            $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+            if ($id <= 0) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Ungültige ID.']);
+                exit;
+            }
+
+            $stmt = $pdo->prepare("SELECT id, appointment_id, original_filename, uploaded_by FROM files WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+            $file = $stmt->fetch();
+            if (!$file) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Datei nicht gefunden.']);
+                exit;
+            }
+
+            // Verify permission
+            $canEdit = false;
+            if ($file['uploaded_by'] === $userId) {
+                $canEdit = true;
+            } elseif ($file['appointment_id']) {
+                $stmtApp = $pdo->prepare("
+                    SELECT 1 FROM appointments a
+                    WHERE a.id = :app_id AND (a.created_by = :user_id OR EXISTS (
+                        SELECT 1 FROM appointment_permissions ap WHERE ap.appointment_id = a.id AND ap.account_id = :user_id
+                    ))
+                ");
+                $stmtApp->execute(['app_id' => $file['appointment_id'], 'user_id' => $userId]);
+                if ($stmtApp->fetch()) $canEdit = true;
+            } else {
+                $stmtFilePerm = $pdo->prepare("SELECT 1 FROM file_permissions fp WHERE fp.file_id = :file_id AND fp.account_id = :user_id");
+                $stmtFilePerm->execute(['file_id' => $id, 'user_id' => $userId]);
+                if ($stmtFilePerm->fetch()) $canEdit = true;
+            }
+
+            if (!$canEdit) {
+                http_response_code(403);
+                echo json_encode(['error' => 'Keine Berechtigung.']);
+                exit;
+            }
+
+            // Fetch allowed users if no appointment
+            $allowed_users = [];
+            if (!$file['appointment_id']) {
+                $stmtPerm = $pdo->prepare("SELECT account_id FROM file_permissions WHERE file_id = :file_id");
+                $stmtPerm->execute(['file_id' => $id]);
+                $allowed_users = $stmtPerm->fetchAll(PDO::FETCH_COLUMN);
+            }
+
+            echo json_encode([
+                'success' => true,
+                'file' => [
+                    'id' => $file['id'],
+                    'original_filename' => $file['original_filename'],
+                    'appointment_id' => $file['appointment_id'],
+                    'allowed_users' => $allowed_users
+                ]
+            ]);
+            break;
+            
         case 'list':
             $appointmentId = isset($_GET['appointment_id']) ? intval($_GET['appointment_id']) : null;
             
@@ -266,6 +327,100 @@ try {
             
             $files = $stmt->fetchAll();
             echo json_encode(['success' => true, 'files' => $files]);
+            break;
+            
+        case 'update':
+            $id = intval($input['id'] ?? 0);
+            if ($id <= 0) throw new Exception('Ungültige ID.');
+            
+            $stmt = $pdo->prepare("SELECT appointment_id, original_filename, uploaded_by FROM files WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+            $file = $stmt->fetch();
+            if (!$file) throw new Exception('Datei nicht gefunden.');
+
+            // Verify permission
+            $canEdit = false;
+            if ($file['uploaded_by'] === $userId) {
+                $canEdit = true;
+            } elseif ($file['appointment_id']) {
+                $stmtApp = $pdo->prepare("
+                    SELECT 1 FROM appointments a
+                    WHERE a.id = :app_id AND (a.created_by = :user_id OR EXISTS (
+                        SELECT 1 FROM appointment_permissions ap WHERE ap.appointment_id = a.id AND ap.account_id = :user_id
+                    ))
+                ");
+                $stmtApp->execute(['app_id' => $file['appointment_id'], 'user_id' => $userId]);
+                if ($stmtApp->fetch()) $canEdit = true;
+            } else {
+                $stmtFilePerm = $pdo->prepare("SELECT 1 FROM file_permissions fp WHERE fp.file_id = :file_id AND fp.account_id = :user_id");
+                $stmtFilePerm->execute(['file_id' => $id, 'user_id' => $userId]);
+                if ($stmtFilePerm->fetch()) $canEdit = true;
+            }
+
+            if (!$canEdit) {
+                http_response_code(403);
+                throw new Exception('Keine Berechtigung diese Datei zu bearbeiten.');
+            }
+
+            $newAppointmentId = isset($input['appointment_id']) && $input['appointment_id'] !== '' && $input['appointment_id'] !== 'null' ? intval($input['appointment_id']) : null;
+            
+            // Check access to new appointment if set
+            if ($newAppointmentId) {
+                $stmtApp = $pdo->prepare("
+                    SELECT 1 FROM appointments a
+                    WHERE a.id = :app_id AND (a.created_by = :user_id OR EXISTS (
+                        SELECT 1 FROM appointment_permissions ap WHERE ap.appointment_id = a.id AND ap.account_id = :user_id
+                    ))
+                ");
+                $stmtApp->execute(['app_id' => $newAppointmentId, 'user_id' => $userId]);
+                if (!$stmtApp->fetch()) {
+                    throw new Exception('Keine Berechtigung, Dateien diesem Termin zuzuordnen.');
+                }
+            }
+
+            $pdo->beginTransaction();
+            try {
+                $oldAppointmentId = $file['appointment_id'];
+
+                $stmtUpdate = $pdo->prepare("UPDATE files SET appointment_id = :appointment_id WHERE id = :id");
+                $stmtUpdate->execute(['appointment_id' => $newAppointmentId, 'id' => $id]);
+
+                $stmtDelPerms = $pdo->prepare("DELETE FROM file_permissions WHERE file_id = :id");
+                $stmtDelPerms->execute(['id' => $id]);
+
+                if (!$newAppointmentId) {
+                    $allowedUsersRaw = $input['allowed_users'] ?? '';
+                    $allowedUsers = [];
+                    if (!empty($allowedUsersRaw)) {
+                        $allowedUsers = is_array($allowedUsersRaw) ? $allowedUsersRaw : json_decode($allowedUsersRaw, true);
+                    }
+                    $stmtPerm = $pdo->prepare("INSERT INTO file_permissions (file_id, account_id) VALUES (:file_id, :account_id)");
+                    foreach ($allowedUsers as $uId) {
+                        $uId = intval($uId);
+                        if ($uId > 0 && $uId !== $file['uploaded_by']) {
+                            $stmtPerm->execute(['file_id' => $id, 'account_id' => $uId]);
+                        }
+                    }
+                }
+
+                if ($oldAppointmentId && $oldAppointmentId !== $newAppointmentId) {
+                    $changes = ['file_deleted' => ['name' => $file['original_filename']]];
+                    $stmtLog = $pdo->prepare("INSERT INTO appointment_history (appointment_id, changed_by, changes) VALUES (:app_id, :user_id, :changes)");
+                    $stmtLog->execute(['app_id' => $oldAppointmentId, 'user_id' => $userId, 'changes' => json_encode($changes)]);
+                }
+
+                if ($newAppointmentId && $oldAppointmentId !== $newAppointmentId) {
+                    $changes = ['file_added' => ['name' => $file['original_filename']]];
+                    $stmtLog = $pdo->prepare("INSERT INTO appointment_history (appointment_id, changed_by, changes) VALUES (:app_id, :user_id, :changes)");
+                    $stmtLog->execute(['app_id' => $newAppointmentId, 'user_id' => $userId, 'changes' => json_encode($changes)]);
+                }
+
+                $pdo->commit();
+                echo json_encode(['success' => true, 'message' => 'Datei erfolgreich aktualisiert.']);
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
             break;
             
         case 'delete':

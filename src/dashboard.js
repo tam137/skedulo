@@ -904,55 +904,70 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Initial load of table data
-    loadAppointments();
+    function switchView(viewName, isInitialLoad = false) {
+        const validViews = ['calendar', 'files'];
+        if (navAdmin) validViews.push('admin');
 
-    // --- FILE MANAGEMENT LOGIC ---
+        if (!validViews.includes(viewName)) {
+            viewName = 'calendar';
+        }
+
+        // Toggle active class on navigation links
+        navCalendar.classList.toggle('active', viewName === 'calendar');
+        navFiles.classList.toggle('active', viewName === 'files');
+        if (navAdmin) {
+            navAdmin.classList.toggle('active', viewName === 'admin');
+        }
+
+        // Toggle hidden class on view containers
+        calendarView.classList.toggle('hidden', viewName !== 'calendar');
+        filesView.classList.toggle('hidden', viewName !== 'files');
+        if (adminView) {
+            adminView.classList.toggle('hidden', viewName !== 'admin');
+        }
+
+        // Set page title and load data
+        if (viewName === 'files') {
+            mainTitle.textContent = 'Dateien';
+            loadGlobalFiles();
+        } else if (viewName === 'admin') {
+            mainTitle.textContent = 'Benutzerverwaltung';
+            loadUsersAdmin();
+        } else {
+            mainTitle.textContent = 'Kalender';
+            loadAppointments();
+        }
+
+        // Close the sidebar if it was opened
+        if (!isInitialLoad) {
+            closeSidebar();
+        }
+
+        // Save to sessionStorage
+        sessionStorage.setItem('dashboard_current_view', viewName);
+    }
 
     // Navigation toggles
     navCalendar.addEventListener('click', (e) => {
         e.preventDefault();
-        navCalendar.classList.add('active');
-        navFiles.classList.remove('active');
-        if (navAdmin) navAdmin.classList.remove('active');
-        
-        filesView.classList.add('hidden');
-        if (adminView) adminView.classList.add('hidden');
-        calendarView.classList.remove('hidden');
-        mainTitle.textContent = 'Kalender';
-        closeSidebar();
-        loadAppointments();
+        switchView('calendar');
     });
 
     navFiles.addEventListener('click', (e) => {
         e.preventDefault();
-        navFiles.classList.add('active');
-        navCalendar.classList.remove('active');
-        if (navAdmin) navAdmin.classList.remove('active');
-        
-        calendarView.classList.add('hidden');
-        if (adminView) adminView.classList.add('hidden');
-        filesView.classList.remove('hidden');
-        mainTitle.textContent = 'Dateien';
-        closeSidebar();
-        loadGlobalFiles();
+        switchView('files');
     });
 
     if (navAdmin) {
         navAdmin.addEventListener('click', (e) => {
             e.preventDefault();
-            navAdmin.classList.add('active');
-            navCalendar.classList.remove('active');
-            navFiles.classList.remove('active');
-            
-            calendarView.classList.add('hidden');
-            filesView.classList.add('hidden');
-            adminView.classList.remove('hidden');
-            mainTitle.textContent = 'Benutzerverwaltung';
-            closeSidebar();
-            loadUsersAdmin();
+            switchView('admin');
         });
     }
+
+    // Initial load of active view
+    const savedView = sessionStorage.getItem('dashboard_current_view') || 'calendar';
+    switchView(savedView, true);
 
     function formatBytes(bytes, decimals = 2) {
         if (!+bytes) return '0 Bytes';
