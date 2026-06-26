@@ -1,5 +1,8 @@
 # Changelog
 
+## [2026-06-26 11:00]
+- Fixed issue where the Admin Area button was hidden for admin users due to missing 'role' column in user SELECT query.
+
 ## [2026-06-26 10:52]
 - Added Admin Area for managing users.
   - Visible only to users with the 'admin' role.

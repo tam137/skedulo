@@ -10,7 +10,7 @@ if (!check_remember_me()) {
 try {
     $pdo = get_db_connection();
     // Fetch fresh user data to verify status
-    $stmt = $pdo->prepare("SELECT id, username, is_active, created_at, last_login_at, ics_token FROM accounts WHERE id = :id");
+    $stmt = $pdo->prepare("SELECT id, username, role, is_active, created_at, last_login_at, ics_token FROM accounts WHERE id = :id");
     $stmt->execute(['id' => $_SESSION['user_id']]);
     $user = $stmt->fetch();
 
