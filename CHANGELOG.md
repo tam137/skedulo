@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026-06-26 11:48]
+- Prepared repository for Open Source release:
+  - Added `config.php` to `.gitignore` to prevent accidental credential commits.
+  - Added "Installation & Einrichtung" section to `README.md`.
+  - Updated `agent-workflow/readme-manage.md` to mandate the Installation section.
+
 ## [2026-06-26 11:45]
 - Removed "Konto aktiv" (account status) and "Letzter Login" (last login timestamp) information from the sidebar drawer (hamburger menu).
 

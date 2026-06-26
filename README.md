@@ -4,6 +4,16 @@ Willkommen bei **Skedulo**! Diese Webanwendung bietet dir eine einfache und übe
 
 ---
 
+## 🚀 Installation & Einrichtung
+
+1. Klone das Repository.
+2. Kopiere die Datei `config.example.php` und benenne sie in `config.php` um.
+3. Trage deine Datenbank-Zugangsdaten in der neuen `config.php` ein.
+4. Stelle sicher, dass die `config.php` für dein Backend (z. B. im übergeordneten Verzeichnis deines Web-Roots wie `/var/www/config.php`) sicher abgelegt ist.
+5. Die App steht unter der **Apache 2.0 Lizenz**.
+
+---
+
 ## Kernfunktionen für Nutzer
 
 ### 📅 Terminkalender

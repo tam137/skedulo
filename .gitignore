@@ -10,6 +10,7 @@
 *.cert
 credentials.json
 client_secret.json
+config.php
 
 # Local configurations / IDEs
 .vscode/
