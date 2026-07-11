@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const currentUserId = parseInt(document.body.dataset.userId, 10);
+
     // Sidebar Elements
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const sidebarDrawer = document.getElementById('sidebar-drawer');
@@ -129,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.placeholderText = placeholderText;
             this.users = []; // {id, username}
             this.selectedIds = new Set();
+            this.disabled = false;
             
             this.initEvents();
         }
@@ -137,9 +140,21 @@ document.addEventListener('DOMContentLoaded', () => {
             this.users = users;
             this.renderOptions();
         }
+
+        setDisabled(disabled) {
+            this.disabled = !!disabled;
+            if (this.disabled) {
+                this.container.classList.add('disabled');
+                this.closeDropdown();
+            } else {
+                this.container.classList.remove('disabled');
+            }
+            this.updateTrigger();
+        }
         
         initEvents() {
             this.trigger.addEventListener('click', (e) => {
+                if (this.disabled) return;
                 e.stopPropagation();
                 this.toggleDropdown();
             });
@@ -202,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         toggleOption(id, optionElement) {
+            if (this.disabled) return;
             if (this.selectedIds.has(id)) {
                 this.selectedIds.delete(id);
                 optionElement.classList.remove('selected');
@@ -265,18 +281,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         tag.className = 'multiselect-tag';
                         tag.textContent = user.username;
                         
-                        const removeBtn = document.createElement('span');
-                        removeBtn.className = 'multiselect-tag-remove';
-                        removeBtn.innerHTML = '&times;';
-                        removeBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            this.selectedIds.delete(user.id);
-                            this.updateOptionsUI();
-                            this.updateTrigger();
-                            this.triggerEvent();
-                        });
+                        if (!this.disabled) {
+                            const removeBtn = document.createElement('span');
+                            removeBtn.className = 'multiselect-tag-remove';
+                            removeBtn.innerHTML = '&times;';
+                            removeBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                this.selectedIds.delete(user.id);
+                                this.updateOptionsUI();
+                                this.updateTrigger();
+                                this.triggerEvent();
+                            });
+                            tag.appendChild(removeBtn);
+                        }
                         
-                        tag.appendChild(removeBtn);
                         tagsContainer.appendChild(tag);
                     }
                 });
@@ -553,9 +571,10 @@ document.addEventListener('DOMContentLoaded', () => {
         historySection.classList.add('hidden');
         historyContent.innerHTML = '';
         
-        // Clear sharing selection
+        // Clear sharing selection and enable it
         if (appointmentSharingSelect) {
             appointmentSharingSelect.clear();
+            appointmentSharingSelect.setDisabled(false);
         }
 
         // Reset emoji picker to none
@@ -598,9 +617,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 locationInput.value = apt.location || '';
                 notesInput.value = apt.notes || '';
 
-                // Set sharing permissions
+                const isCreator = parseInt(apt.created_by, 10) === currentUserId;
+
+                // Set sharing permissions and disable if not the creator
                 if (appointmentSharingSelect) {
                     appointmentSharingSelect.setSelected(data.allowed_users || []);
+                    appointmentSharingSelect.setDisabled(!isCreator);
                 }
 
                 // Set emoji picker value and active button styling
@@ -673,7 +695,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 modalTitle.textContent = 'Termin bearbeiten';
-                deleteBtn.classList.remove('hidden');
+                if (isCreator) {
+                    deleteBtn.classList.remove('hidden');
+                } else {
+                    deleteBtn.classList.add('hidden');
+                }
                 appointmentModal.classList.add('active');
             })
             .catch(err => {

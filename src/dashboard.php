@@ -45,7 +45,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
 </head>
-<body>
+<body data-user-id="<?php echo (int)$user['id']; ?>">
     <!-- Drawer Backdrop -->
     <div class="drawer-backdrop" id="drawer-backdrop"></div>
 

@@ -23,7 +23,8 @@ Willkommen bei **Skedulo**! Diese Webanwendung bietet dir eine einfache und übe
 * **Kalender abonnieren (Outlook/ICS):** Du kannst deine Termine über einen sicheren Link ganz einfach in Outlook, Apple Kalender oder Google Kalender abonnieren (Nur-Lese-Zugriff).
 
 ### 🤝 Teilen & Freigabe von Terminen
-* **Zusammenarbeit:** Teile deine Termine mit anderen registrierten Nutzern. Du kannst entscheiden, wer Lese- oder Schreibrechte für deine Termine erhält.
+* **Zusammenarbeit:** Teile deine Termine mit anderen registrierten Nutzern, um ihnen Lese- & Schreibrechte zu erteilen.
+* **Ersteller-Schutz:** Nur der Ersteller eines Termins kann die Freigabeliste anpassen oder den Termin löschen. Personen, mit denen der Termin geteilt wurde, können den Termin inhaltlich bearbeiten (Notizen, Ort etc.), aber nicht löschen oder Freigaben bearbeiten.
 
 ### 📁 Dateiverwaltung & Anhänge
 * **Terminspezifische Dateien:** Lade Dokumente, Bilder oder andere Dateien direkt in einen Termin hoch, damit du am Tag des Termins alles Wichtige sofort griffbereit hast.

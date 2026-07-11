@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026-07-11 18:43]
+- Restricted editing of appointment sharing permissions and deletion of appointments to their creator:
+  - Passed the logged-in user's ID from PHP to the HTML body tag using a data attribute.
+  - Implemented `setDisabled(disabled)` state in `CustomMultiSelect` to dynamically toggle input availability, styling the trigger, and hiding tag removal button when disabled.
+  - Disabled the "Teilen mit" select box and hid the "Löschen" button in the edit modal if the current user is not the appointment's creator.
+  - Added backend security validation in `appointments_api.php` to reject unauthorized changes to sharing permissions and unauthorized deletions by non-creators.
+
 ## [2026-06-26 20:29]
 - Added tab persistence to the dashboard:
   - Stored the active view state (Calendar, Files, or Admin Area) in the browser's `sessionStorage`.

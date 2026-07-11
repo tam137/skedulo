@@ -329,19 +329,42 @@ try {
                 ]);
             }
 
-            // Delete and re-insert sharing permissions
-            $stmtDelPerm = $pdo->prepare("DELETE FROM appointment_permissions WHERE appointment_id = :id");
-            $stmtDelPerm->execute(['id' => $id]);
+            // Security check: Only the creator can change the sharing list
+            if ($existing['created_by'] !== $userId) {
+                if (isset($input['allowed_users'])) {
+                    // Fetch existing allowed users
+                    $stmtCurrentPerms = $pdo->prepare("SELECT account_id FROM appointment_permissions WHERE appointment_id = :id");
+                    $stmtCurrentPerms->execute(['id' => $id]);
+                    $currentAllowed = $stmtCurrentPerms->fetchAll(PDO::FETCH_COLUMN);
+                    $currentAllowed = array_map('intval', $currentAllowed);
 
-            if (isset($input['allowed_users']) && is_array($input['allowed_users'])) {
-                $stmtAddPerm = $pdo->prepare("INSERT INTO appointment_permissions (appointment_id, account_id) VALUES (:appointment_id, :account_id)");
-                foreach ($input['allowed_users'] as $allowedUserId) {
-                    $allowedUserId = intval($allowedUserId);
-                    if ($allowedUserId !== $existing['created_by']) { // creator always has access
-                        $stmtAddPerm->execute([
-                            'appointment_id' => $id,
-                            'account_id' => $allowedUserId
-                        ]);
+                    $newAllowed = array_map('intval', $input['allowed_users']);
+                    $newAllowed = array_filter($newAllowed, function($uid) use ($existing) {
+                        return $uid !== intval($existing['created_by']);
+                    });
+
+                    sort($currentAllowed);
+                    sort($newAllowed);
+
+                    if ($currentAllowed !== $newAllowed) {
+                        throw new Exception('Nur der Ersteller dieses Termins darf die Freigabeliste ändern.');
+                    }
+                }
+            } else {
+                // Delete and re-insert sharing permissions (only for creator)
+                $stmtDelPerm = $pdo->prepare("DELETE FROM appointment_permissions WHERE appointment_id = :id");
+                $stmtDelPerm->execute(['id' => $id]);
+
+                if (isset($input['allowed_users']) && is_array($input['allowed_users'])) {
+                    $stmtAddPerm = $pdo->prepare("INSERT INTO appointment_permissions (appointment_id, account_id) VALUES (:appointment_id, :account_id)");
+                    foreach ($input['allowed_users'] as $allowedUserId) {
+                        $allowedUserId = intval($allowedUserId);
+                        if ($allowedUserId !== $existing['created_by']) { // creator always has access
+                            $stmtAddPerm->execute([
+                                'appointment_id' => $id,
+                                'account_id' => $allowedUserId
+                            ]);
+                        }
                     }
                 }
             }
@@ -375,19 +398,12 @@ try {
                 exit;
             }
 
-            // Check permission: creator or shared user
+            // Check permission: only the creator can delete the appointment
             if ($existing['created_by'] !== $userId) {
-                $stmtPerm = $pdo->prepare("
-                    SELECT 1 FROM appointment_permissions 
-                    WHERE appointment_id = :appointment_id AND account_id = :account_id
-                ");
-                $stmtPerm->execute(['appointment_id' => $id, 'account_id' => $userId]);
-                if (!$stmtPerm->fetch()) {
-                    $pdo->rollBack();
-                    http_response_code(403);
-                    echo json_encode(['error' => 'Keine Berechtigung diesen Termin zu löschen.']);
-                    exit;
-                }
+                $pdo->rollBack();
+                http_response_code(403);
+                echo json_encode(['error' => 'Nur der Ersteller darf diesen Termin löschen.']);
+                exit;
             }
 
             $stmtDel = $pdo->prepare("DELETE FROM appointments WHERE id = :id");
