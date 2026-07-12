@@ -13,3 +13,9 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+.empty-list-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    padding: 4px 0;
+}

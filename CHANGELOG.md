@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026-07-12 12:00]
+- Aligned frontend with Separation of Concerns guidelines by removing all inline CSS:
+  - Created modular classes (`.font-medium`, `.cell-notes`, `.current-account-label`, `.empty-list-text`, `.form-hint`) in CSS modules.
+  - Replaced all inline `style="..."` attributes in `dashboard.php` with modular utility/subclasses.
+  - Cleaned up dynamic inline style modifications in JavaScript files (`admin.js`, `appointments.js`, `files.js`, `CustomMultiSelect.js`).
+
 ## [2026-07-12 11:51]
 - Refactored remaining monolithic JavaScript into decoupled ES6 modules (Phase 2):
   - Extracted shared application state into `src/js/state.js`.

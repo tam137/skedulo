@@ -202,9 +202,6 @@ import { escapeHtml } from '../utils.js';
                 if (!noResults) {
                     noResults = document.createElement('div');
                     noResults.className = 'multiselect-option no-results';
-                    noResults.style.color = 'var(--text-secondary)';
-                    noResults.style.cursor = 'default';
-                    noResults.style.justifyContent = 'center';
                     noResults.textContent = 'Keine Benutzer gefunden';
                     this.optionsContainer.appendChild(noResults);
                 }

@@ -332,3 +332,17 @@
     font-weight: 600;
     color: #ffffff;
 }
+
+#copy-ics-btn {
+    margin-bottom: 8px;
+}
+
+.status-indicator.deactivated {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
+}
+
+.status-indicator.deactivated .status-dot {
+    background-color: var(--error);
+    box-shadow: 0 0 8px var(--error);
+}

@@ -101,7 +101,7 @@ function renderTable(appointments, tbodyId, loadingText, emptyText) {
             <td class="cell-date" data-label="Datum">${dateHtml}${fileIndicatorHtml}</td>
             <td class="cell-title" data-label="Name">${titleEscaped}</td>
             <td data-label="Ort">${locationEscaped}</td>
-            <td data-label="Notizen" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${notesEscaped}</td>
+            <td data-label="Notizen" class="cell-notes">${notesEscaped}</td>
         `;
 
         tr.addEventListener('click', () => openEditModal(apt.id));

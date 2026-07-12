@@ -42,7 +42,7 @@ function renderUsersAdmin(users) {
         if (u.is_active) {
             statusHtml = '<span class="status-indicator"><span class="status-dot"></span>Aktiv</span>';
         } else {
-            statusHtml = '<span class="status-indicator" style="background: rgba(239, 68, 68, 0.15); color: var(--error);"><span class="status-dot" style="background-color: var(--error); box-shadow: 0 0 8px var(--error);"></span>Deaktiviert</span>';
+            statusHtml = '<span class="status-indicator deactivated"><span class="status-dot"></span>Deaktiviert</span>';
         }
 
         const isCurrentUser = parseInt(u.id, 10) === state.currentUserId;
@@ -55,11 +55,11 @@ function renderUsersAdmin(users) {
                 <button type="button" class="btn btn-cancel btn-sm action-btn-reset-pwd" data-id="${u.id}">Passwort zurücksetzen</button>
             `;
         } else {
-            actionsHtml = '<span style="font-size: 0.85rem; color: var(--text-secondary); font-style: italic;">Aktuelles Konto</span>';
+            actionsHtml = '<span class="current-account-label">Aktuelles Konto</span>';
         }
 
         tr.innerHTML = `
-            <td data-label="Benutzername" style="font-weight: 500;">${nameEscaped}</td>
+            <td data-label="Benutzername" class="font-medium">${nameEscaped}</td>
             <td data-label="Rolle">${roleEscaped}</td>
             <td data-label="Status">${statusHtml}</td>
             <td data-label="Letzter Login">${lastLogin}</td>

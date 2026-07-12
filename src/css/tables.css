@@ -110,3 +110,20 @@
     border-radius: 0;
     margin-bottom: 0;
 }
+
+.font-medium {
+    font-weight: 500;
+}
+
+.cell-notes {
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.current-account-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}

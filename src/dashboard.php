@@ -99,7 +99,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
         </div>
 
         <div class="sidebar-footer">
-            <button id="copy-ics-btn" class="change-pwd-btn" data-token="<?php echo htmlspecialchars($user['ics_token']); ?>" style="margin-bottom: 8px;">
+            <button id="copy-ics-btn" class="change-pwd-btn" data-token="<?php echo htmlspecialchars($user['ics_token']); ?>">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                     <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
@@ -473,7 +473,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                     </select>
                 </div>
                 
-                <div class="files-hint" style="margin-top: 10px; margin-bottom: 0; display: block;">
+                <div class="form-hint">
                     Das Startpasswort wird automatisch auf <strong>Start123!</strong> gesetzt.
                 </div>
 
@@ -587,7 +587,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 <h3 class="modal-title">Datei hochladen</h3>
                 <button class="close-btn" id="close-upload-modal-btn">&times;</button>
             </div>
-            <div class="alert alert-danger hidden" id="upload-file-error-alert" style="margin: 0 24px 16px 24px;">
+            <div class="alert alert-danger hidden" id="upload-file-error-alert">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -645,7 +645,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 <h3 class="modal-title">Datei bearbeiten</h3>
                 <button class="close-btn" id="close-edit-modal-btn">&times;</button>
             </div>
-            <div class="alert alert-danger hidden" id="edit-file-error-alert" style="margin: 0 24px 16px 24px;">
+            <div class="alert alert-danger hidden" id="edit-file-error-alert">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -657,7 +657,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 <input type="hidden" id="edit-file-id">
                 <div class="form-group">
                     <label class="form-label">Dateiname</label>
-                    <div class="file-name-display" id="edit-file-name-display" style="margin-top: 0;"></div>
+                    <div class="file-name-display" id="edit-file-name-display"></div>
                 </div>
 
                 <div class="form-group">

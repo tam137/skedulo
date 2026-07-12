@@ -93,7 +93,7 @@ function renderGlobalFiles(files) {
         }
 
         tr.innerHTML = `
-            <td data-label="Dateiname" style="font-weight: 500;">${nameEscaped}</td>
+            <td data-label="Dateiname" class="font-medium">${nameEscaped}</td>
             <td data-label="Termin">${appointmentLabel}</td>
             <td data-label="Größe">${sizeFormatted}</td>
             <td data-label="Hochgeladen von">${creatorEscaped}</td>
@@ -151,7 +151,7 @@ export function renderAppointmentFiles(files, appointmentId) {
     appointmentFilesList.innerHTML = '';
 
     if (files.length === 0) {
-        appointmentFilesList.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.9rem; padding: 4px 0;">Keine Dateien angehängt.</div>';
+        appointmentFilesList.innerHTML = '<div class="empty-list-text">Keine Dateien angehängt.</div>';
         return;
     }
 

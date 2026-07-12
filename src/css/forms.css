@@ -33,3 +33,11 @@ select.form-input option {
     background-color: var(--bg-secondary);
     color: #ffffff;
 }
+
+.form-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 10px;
+    margin-bottom: 0;
+    line-height: 1.4;
+}
