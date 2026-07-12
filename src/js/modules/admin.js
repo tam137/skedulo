@@ -39,7 +39,7 @@ function renderUsersAdmin(users) {
         const lastLogin = u.last_login_at ? formatDateSimple(u.last_login_at) : 'Nie';
         
         let statusHtml = '';
-        if (parseInt(u.is_active, 10) === 1) {
+        if (u.is_active) {
             statusHtml = '<span class="status-indicator"><span class="status-dot"></span>Aktiv</span>';
         } else {
             statusHtml = '<span class="status-indicator" style="background: rgba(239, 68, 68, 0.15); color: var(--error);"><span class="status-dot" style="background-color: var(--error); box-shadow: 0 0 8px var(--error);"></span>Deaktiviert</span>';
@@ -49,7 +49,7 @@ function renderUsersAdmin(users) {
         let actionsHtml = '';
         
         if (!isCurrentUser) {
-            const toggleText = parseInt(u.is_active, 10) === 1 ? 'Deaktivieren' : 'Aktivieren';
+            const toggleText = u.is_active ? 'Deaktivieren' : 'Aktivieren';
             actionsHtml = `
                 <button type="button" class="btn btn-cancel btn-sm action-btn-toggle-status" data-id="${u.id}" data-active="${u.is_active}">${toggleText}</button>
                 <button type="button" class="btn btn-cancel btn-sm action-btn-reset-pwd" data-id="${u.id}">Passwort zurücksetzen</button>
@@ -76,7 +76,7 @@ function renderUsersAdmin(users) {
     usersTbody.querySelectorAll('.action-btn-toggle-status').forEach(btn => {
         btn.addEventListener('click', () => {
             const id = btn.getAttribute('data-id');
-            const isActive = parseInt(btn.getAttribute('data-active'), 10) === 1;
+            const isActive = btn.getAttribute('data-active') === 'true';
             promptToggleStatus(id, isActive);
         });
     });
