@@ -88,7 +88,7 @@ function renderTable(appointments, tbodyId, loadingText, emptyText) {
         const tr = document.createElement('tr');
         tr.dataset.id = apt.id;
         
-        const dateHtml = formatAppointmentDate(apt.appointment_date);
+        const dateHtml = formatAppointmentDate(apt.appointment_date, apt.all_day, apt.duration_hours, apt.duration_days);
         const iconPrefix = apt.icon ? apt.icon + ' ' : '';
         const titleEscaped = iconPrefix + escapeHtml(apt.title);
         const locationEscaped = escapeHtml(apt.location || '-');
@@ -134,6 +134,19 @@ export function openCreateModal() {
     btnUploadAppointmentFile.disabled = true;
     filesHint.classList.remove('hidden');
     appointmentFilesList.innerHTML = '';
+
+    // Reset Termintyp to all_day
+    const allDayRadio = document.querySelector('input[name="appointment_type"][value="all_day"]');
+    if (allDayRadio) {
+        allDayRadio.checked = true;
+    }
+    const startTimeInput = document.getElementById('start_time');
+    const durationHoursInput = document.getElementById('duration_hours');
+    const durationDaysInput = document.getElementById('duration_days');
+    if (startTimeInput) startTimeInput.value = '';
+    if (durationHoursInput) durationHoursInput.value = '';
+    if (durationDaysInput) durationDaysInput.value = '';
+    toggleAppointmentTypeFields();
     
     const now = new Date();
     const yyyy = now.getFullYear();
@@ -173,6 +186,34 @@ export function openEditModal(id) {
             btnUploadAppointmentFile.disabled = false;
             filesHint.classList.add('hidden');
             renderAppointmentFiles(data.files || [], apt.id);
+
+            // Set Termintyp UI
+            let type = 'all_day';
+            const isAllDay = apt.all_day === true || apt.all_day === 1 || apt.all_day === '1' || apt.all_day === 'true';
+            const startTimeInput = document.getElementById('start_time');
+            const durationHoursInput = document.getElementById('duration_hours');
+            const durationDaysInput = document.getElementById('duration_days');
+            
+            if (startTimeInput) startTimeInput.value = '';
+            if (durationHoursInput) durationHoursInput.value = '';
+            if (durationDaysInput) durationDaysInput.value = '';
+
+            if (!isAllDay) {
+                type = 'time_based';
+                const parts = apt.appointment_date.split(' ');
+                if (parts.length > 1) {
+                    const timePart = parts[1].substring(0, 5); // HH:MM
+                    if (startTimeInput) startTimeInput.value = timePart;
+                }
+                if (durationHoursInput) durationHoursInput.value = apt.duration_hours || '';
+            } else if (apt.duration_days && parseInt(apt.duration_days, 10) > 1) {
+                type = 'multi_day';
+                if (durationDaysInput) durationDaysInput.value = apt.duration_days;
+            }
+
+            const radioToSelect = document.querySelector(`input[name="appointment_type"][value="${type}"]`);
+            if (radioToSelect) radioToSelect.checked = true;
+            toggleAppointmentTypeFields();
 
             const d = new Date(apt.appointment_date.replace(' ', 'T'));
             const yyyy = d.getFullYear();
@@ -243,24 +284,30 @@ function formatChanges(changes) {
         location: 'Ort',
         appointment_date: 'Datum',
         notes: 'Notizen',
-        icon: 'Symbol'
+        icon: 'Symbol',
+        all_day: 'Ganztägig',
+        duration_hours: 'Dauer (Stunden)',
+        duration_days: 'Dauer (Tage)'
     };
     let html = '';
     for (const field in changes) {
         const fieldLabel = labels[field] || field;
-        let oldVal = changes[field]['old'] || 'Keine';
-        let newVal = changes[field]['new'] || 'Keine';
+        let oldVal = changes[field]['old'] ?? 'Keine';
+        let newVal = changes[field]['new'] ?? 'Keine';
         
         if (field === 'appointment_date') {
             oldVal = formatDateOnly(oldVal);
             newVal = formatDateOnly(newVal);
+        } else if (field === 'all_day') {
+            oldVal = (oldVal === true || oldVal === 1 || oldVal === '1' || oldVal === 'true') ? 'Ja' : 'Nein';
+            newVal = (newVal === true || newVal === 1 || newVal === '1' || newVal === 'true') ? 'Ja' : 'Nein';
         }
         
         html += `<div class="history-change-line">
             <strong>${fieldLabel}:</strong> 
-            <span class="history-old-value">${escapeHtml(oldVal)}</span> 
+            <span class="history-old-value">${escapeHtml(String(oldVal))}</span> 
             <span class="change-arrow">➔</span> 
-            <span class="history-new-value">${escapeHtml(newVal)}</span>
+            <span class="history-new-value">${escapeHtml(String(newVal))}</span>
         </div>`;
     }
     return html;
@@ -405,4 +452,44 @@ document.addEventListener('view-changed', (e) => {
     if (e.detail.view === 'calendar') {
         loadAppointments();
     }
+});
+
+function toggleAppointmentTypeFields() {
+    const timeBasedFields = document.getElementById('time-based-fields');
+    const multiDayFields = document.getElementById('multi-day-fields');
+    const dateLabel = document.getElementById('date-label');
+    const startTimeInput = document.getElementById('start_time');
+    const durationHoursInput = document.getElementById('duration_hours');
+    const durationDaysInput = document.getElementById('duration_days');
+    
+    const selectedType = document.querySelector('input[name="appointment_type"]:checked')?.value || 'all_day';
+    
+    if (selectedType === 'all_day') {
+        if (timeBasedFields) timeBasedFields.style.display = 'none';
+        if (multiDayFields) multiDayFields.style.display = 'none';
+        if (dateLabel) dateLabel.textContent = 'Datum';
+        if (startTimeInput) startTimeInput.removeAttribute('required');
+        if (durationHoursInput) durationHoursInput.removeAttribute('required');
+        if (durationDaysInput) durationDaysInput.removeAttribute('required');
+    } else if (selectedType === 'time_based') {
+        if (timeBasedFields) timeBasedFields.style.display = 'grid';
+        if (multiDayFields) multiDayFields.style.display = 'none';
+        if (dateLabel) dateLabel.textContent = 'Datum';
+        if (startTimeInput) startTimeInput.setAttribute('required', 'required');
+        if (durationHoursInput) durationHoursInput.setAttribute('required', 'required');
+        if (durationDaysInput) durationDaysInput.removeAttribute('required');
+    } else if (selectedType === 'multi_day') {
+        if (timeBasedFields) timeBasedFields.style.display = 'none';
+        if (multiDayFields) multiDayFields.style.display = 'block';
+        if (dateLabel) dateLabel.textContent = 'Startdatum';
+        if (startTimeInput) startTimeInput.removeAttribute('required');
+        if (durationHoursInput) durationHoursInput.removeAttribute('required');
+        if (durationDaysInput) durationDaysInput.setAttribute('required', 'required');
+    }
+}
+
+// Add event listener for radio selector
+const typeRadios = document.querySelectorAll('input[name="appointment_type"]');
+typeRadios.forEach(radio => {
+    radio.addEventListener('change', toggleAppointmentTypeFields);
 });

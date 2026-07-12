@@ -80,6 +80,17 @@ try {
             $stmt->execute(['today' => $today, 'limitDate' => $limitDate, 'userId' => $userId]);
             $past = $stmt->fetchAll();
 
+            foreach ($upcoming as &$apt) {
+                $apt['all_day'] = filter_var($apt['all_day'], FILTER_VALIDATE_BOOLEAN);
+                $apt['duration_hours'] = $apt['duration_hours'] !== null ? floatval($apt['duration_hours']) : null;
+                $apt['duration_days'] = $apt['duration_days'] !== null ? intval($apt['duration_days']) : null;
+            }
+            foreach ($past as &$apt) {
+                $apt['all_day'] = filter_var($apt['all_day'], FILTER_VALIDATE_BOOLEAN);
+                $apt['duration_hours'] = $apt['duration_hours'] !== null ? floatval($apt['duration_hours']) : null;
+                $apt['duration_days'] = $apt['duration_days'] !== null ? intval($apt['duration_days']) : null;
+            }
+
             echo json_encode([
                 'success' => true,
                 'upcoming' => $upcoming,
@@ -108,6 +119,10 @@ try {
                 echo json_encode(['error' => 'Termin nicht gefunden.']);
                 exit;
             }
+
+            $appointment['all_day'] = filter_var($appointment['all_day'], FILTER_VALIDATE_BOOLEAN);
+            $appointment['duration_hours'] = $appointment['duration_hours'] !== null ? floatval($appointment['duration_hours']) : null;
+            $appointment['duration_days'] = $appointment['duration_days'] !== null ? intval($appointment['duration_days']) : null;
 
             // Check access permission: creator or explicitly shared in appointment_permissions
             if ($appointment['created_by'] !== $userId) {
@@ -179,13 +194,40 @@ try {
                 throw new Exception('Bitte gib ein Datum ein.');
             }
 
-            $dateFormatted = date('Y-m-d 00:00:00', strtotime($dateRaw));
+            $type = trim($input['appointment_type'] ?? 'all_day');
+            $all_day = true;
+            $duration_hours = null;
+            $duration_days = null;
+
+            if ($type === 'time_based') {
+                $all_day = false;
+                $startTime = trim($input['start_time'] ?? '');
+                if (empty($startTime)) {
+                    throw new Exception('Bitte gib eine Startzeit ein.');
+                }
+                $dateFormatted = date('Y-m-d H:i:00', strtotime("$dateRaw $startTime"));
+                $duration_hours = floatval($input['duration_hours'] ?? 0);
+                if ($duration_hours <= 0) {
+                    throw new Exception('Bitte gib eine gültige Dauer in Stunden ein.');
+                }
+            } else if ($type === 'multi_day') {
+                $all_day = true;
+                $dateFormatted = date('Y-m-d 00:00:00', strtotime($dateRaw));
+                $duration_days = intval($input['duration_days'] ?? 0);
+                if ($duration_days < 2) {
+                    throw new Exception('Ein Mehrtagestermin muss mindestens 2 Tage dauern.');
+                }
+            } else {
+                $all_day = true;
+                $dateFormatted = date('Y-m-d 00:00:00', strtotime($dateRaw));
+                $duration_days = 1;
+            }
 
             $pdo->beginTransaction();
 
             $stmt = $pdo->prepare("
-                INSERT INTO appointments (title, location, appointment_date, created_by, notes, icon)
-                VALUES (:title, :location, :appointment_date, :created_by, :notes, :icon)
+                INSERT INTO appointments (title, location, appointment_date, created_by, notes, icon, all_day, duration_hours, duration_days)
+                VALUES (:title, :location, :appointment_date, :created_by, :notes, :icon, :all_day, :duration_hours, :duration_days)
                 RETURNING id
             ");
             $stmt->execute([
@@ -194,7 +236,10 @@ try {
                 'appointment_date' => $dateFormatted,
                 'created_by' => $userId,
                 'notes' => $notes !== '' ? $notes : null,
-                'icon' => $icon !== '' ? $icon : null
+                'icon' => $icon !== '' ? $icon : null,
+                'all_day' => $all_day ? 1 : 0,
+                'duration_hours' => $duration_hours,
+                'duration_days' => $duration_days
             ]);
             $newId = $stmt->fetchColumn();
 
@@ -246,6 +291,35 @@ try {
                 throw new Exception('Das Datum darf nicht leer sein.');
             }
 
+            $type = trim($input['appointment_type'] ?? 'all_day');
+            $all_day = true;
+            $duration_hours = null;
+            $duration_days = null;
+
+            if ($type === 'time_based') {
+                $all_day = false;
+                $startTime = trim($input['start_time'] ?? '');
+                if (empty($startTime)) {
+                    throw new Exception('Bitte gib eine Startzeit ein.');
+                }
+                $newDateFormatted = date('Y-m-d H:i:00', strtotime("$dateRaw $startTime"));
+                $duration_hours = floatval($input['duration_hours'] ?? 0);
+                if ($duration_hours <= 0) {
+                    throw new Exception('Bitte gib eine gültige Dauer in Stunden ein.');
+                }
+            } else if ($type === 'multi_day') {
+                $all_day = true;
+                $newDateFormatted = date('Y-m-d 00:00:00', strtotime($dateRaw));
+                $duration_days = intval($input['duration_days'] ?? 0);
+                if ($duration_days < 2) {
+                    throw new Exception('Ein Mehrtagestermin muss mindestens 2 Tage dauern.');
+                }
+            } else {
+                $all_day = true;
+                $newDateFormatted = date('Y-m-d 00:00:00', strtotime($dateRaw));
+                $duration_days = 1;
+            }
+
             // Start a transaction to ensure both history and update succeed together
             $pdo->beginTransaction();
 
@@ -276,9 +350,7 @@ try {
                 }
             }
 
-            $oldDate = date('Y-m-d', strtotime($existing['appointment_date']));
-            $newDate = date('Y-m-d', strtotime($dateRaw));
-            $newDateFormatted = date('Y-m-d 00:00:00', strtotime($dateRaw));
+            $oldDateFormatted = $existing['appointment_date'];
 
             // Compare fields to build changes array
             $changes = [];
@@ -293,8 +365,12 @@ try {
                 $changes['location'] = ['old' => $oldLoc, 'new' => $location];
             }
 
-            if ($oldDate !== $newDate) {
-                $changes['appointment_date'] = ['old' => $oldDate, 'new' => $newDate];
+            if ($oldDateFormatted !== $newDateFormatted) {
+                $oldDStr = $existing['all_day'] ? date('Y-m-d', strtotime($oldDateFormatted)) : $oldDateFormatted;
+                $newDStr = $all_day ? date('Y-m-d', strtotime($newDateFormatted)) : $newDateFormatted;
+                if ($oldDStr !== $newDStr) {
+                    $changes['appointment_date'] = ['old' => $oldDStr, 'new' => $newDStr];
+                }
             }
 
             $oldNotes = $existing['notes'] ?? '';
@@ -305,6 +381,21 @@ try {
             $oldIcon = $existing['icon'] ?? '';
             if ($oldIcon !== $icon) {
                 $changes['icon'] = ['old' => $oldIcon, 'new' => $icon];
+            }
+
+            $oldAllDay = filter_var($existing['all_day'], FILTER_VALIDATE_BOOLEAN);
+            if ($oldAllDay !== $all_day) {
+                $changes['all_day'] = ['old' => $oldAllDay, 'new' => $all_day];
+            }
+
+            $oldDurationHours = $existing['duration_hours'] !== null ? floatval($existing['duration_hours']) : null;
+            if ($oldDurationHours !== $duration_hours) {
+                $changes['duration_hours'] = ['old' => $oldDurationHours, 'new' => $duration_hours];
+            }
+
+            $oldDurationDays = $existing['duration_days'] !== null ? intval($existing['duration_days']) : null;
+            if ($oldDurationDays !== $duration_days) {
+                $changes['duration_days'] = ['old' => $oldDurationDays, 'new' => $duration_days];
             }
 
             // Only log and update if something actually changed
@@ -328,6 +419,9 @@ try {
                         appointment_date = :appointment_date, 
                         notes = :notes, 
                         icon = :icon,
+                        all_day = :all_day,
+                        duration_hours = :duration_hours,
+                        duration_days = :duration_days,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = :id
                 ");
@@ -337,6 +431,9 @@ try {
                     'appointment_date' => $newDateFormatted,
                     'notes' => $notes !== '' ? $notes : null,
                     'icon' => $icon !== '' ? $icon : null,
+                    'all_day' => $all_day ? 1 : 0,
+                    'duration_hours' => $duration_hours,
+                    'duration_days' => $duration_days,
                     'id' => $id
                 ]);
             }

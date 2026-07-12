@@ -54,22 +54,48 @@ echo "X-WR-CALNAME:Skedulo - " . $calname . "\r\n";
 
 foreach ($appointments as $apt) {
     $uid = $apt['id'] . "@skedulo";
-    
-    // Parse the date (Y-m-d H:i:s)
-    $ts = strtotime($apt['appointment_date']);
-    // For all-day events, the DTSTART is YYYYMMDD
-    $dtstart = date('Ymd', $ts);
-    
-    // According to RFC 5545, all-day events should have a DTEND which is the day *after* DTSTART
-    $dtend = date('Ymd', strtotime('+1 day', $ts));
-    
     $dtstamp = date('Ymd\THis\Z', strtotime($apt['updated_at']));
+    
+    $allDay = filter_var($apt['all_day'], FILTER_VALIDATE_BOOLEAN);
     
     echo "BEGIN:VEVENT\r\n";
     echo "UID:" . $uid . "\r\n";
     echo "DTSTAMP:" . $dtstamp . "\r\n";
-    echo "DTSTART;VALUE=DATE:" . $dtstart . "\r\n";
-    echo "DTEND;VALUE=DATE:" . $dtend . "\r\n";
+    
+    if ($allDay) {
+        $ts = strtotime($apt['appointment_date']);
+        $dtstart = date('Ymd', $ts);
+        
+        $durationDays = $apt['duration_days'] !== null ? intval($apt['duration_days']) : 1;
+        if ($durationDays < 1) {
+            $durationDays = 1;
+        }
+        $dtend = date('Ymd', strtotime("+$durationDays days", $ts));
+        
+        echo "DTSTART;VALUE=DATE:" . $dtstart . "\r\n";
+        echo "DTEND;VALUE=DATE:" . $dtend . "\r\n";
+    } else {
+        // Time based: convert Europe/Berlin to UTC
+        $tz_berlin = new DateTimeZone('Europe/Berlin');
+        $dt_start = new DateTime($apt['appointment_date'], $tz_berlin);
+        
+        $durationHours = $apt['duration_hours'] !== null ? floatval($apt['duration_hours']) : 1.0;
+        if ($durationHours <= 0) {
+            $durationHours = 1.0;
+        }
+        $duration_seconds = intval($durationHours * 3600);
+        $dt_end = clone $dt_start;
+        $dt_end->modify("+$duration_seconds seconds");
+        
+        $dt_start->setTimezone(new DateTimeZone('UTC'));
+        $dt_end->setTimezone(new DateTimeZone('UTC'));
+        
+        $dtstart_val = $dt_start->format('Ymd\THis\Z');
+        $dtend_val = $dt_end->format('Ymd\THis\Z');
+        
+        echo "DTSTART:" . $dtstart_val . "\r\n";
+        echo "DTEND:" . $dtend_val . "\r\n";
+    }
     
     // Escape special characters in text fields
     $summary = str_replace(array('\\', ',', ';'), array('\\\\', '\,', '\;'), $apt['title']);

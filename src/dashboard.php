@@ -351,7 +351,22 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 </div>
 
                 <div class="form-group">
-                    <label for="appointment_date" class="form-label">Datum</label>
+                    <label class="form-label">Termintyp</label>
+                    <div class="appointment-type-selector">
+                        <label class="radio-label">
+                            <input type="radio" name="appointment_type" value="all_day" checked> Ganztägig
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="appointment_type" value="time_based"> Mit Uhrzeit
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="appointment_type" value="multi_day"> Mehrtägig
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="appointment_date" class="form-label" id="date-label">Datum</label>
                     <div class="input-wrapper">
                         <div class="input-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -363,6 +378,22 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                         </div>
                         <input type="date" id="appointment_date" name="appointment_date" class="form-input" required>
                     </div>
+                </div>
+
+                <div class="form-row time-based-fields" id="time-based-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="start_time" class="form-label">Startzeit</label>
+                        <input type="time" id="start_time" name="start_time" class="form-input form-input-no-icon">
+                    </div>
+                    <div class="form-group">
+                        <label for="duration_hours" class="form-label">Dauer (Stunden)</label>
+                        <input type="number" id="duration_hours" name="duration_hours" class="form-input form-input-no-icon" min="0.25" step="0.25" placeholder="z.B. 2">
+                    </div>
+                </div>
+
+                <div class="form-group multi-day-fields" id="multi-day-fields" style="display: none;">
+                    <label for="duration_days" class="form-label">Dauer (Tage)</label>
+                    <input type="number" id="duration_days" name="duration_days" class="form-input form-input-no-icon" min="2" step="1" placeholder="z.B. 3">
                 </div>
 
                 <div class="form-group">

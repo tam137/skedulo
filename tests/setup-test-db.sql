@@ -38,6 +38,9 @@ CREATE TABLE appointments (
     created_by BIGINT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     notes TEXT,
     icon VARCHAR(50),
+    all_day BOOLEAN DEFAULT TRUE NOT NULL,
+    duration_hours NUMERIC(5,2) DEFAULT NULL,
+    duration_days INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );

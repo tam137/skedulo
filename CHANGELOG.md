@@ -1,5 +1,14 @@
 # Changelog
 
+## [2026-07-12 16:29]
+- Extended appointment input with start times, duration in hours, and multi-day support:
+  - Added "Termintyp" selector (Ganztägig, Mit Uhrzeit, Mehrtägig) to the appointment modal in `dashboard.php`.
+  - Added new database columns `all_day`, `duration_hours`, and `duration_days` to `appointments` table and updated local test schema.
+  - Implemented conditional inputs (Startzeit, Dauer in Stunden/Tagen) toggled by the Termintyp selector.
+  - Integrated start_time, duration_hours, and duration_days fields in `appointments_api.php` for create, update, list, and get actions, including history logs comparisons.
+  - Updated calendar ICS export in `calendar_feed.php` to format all-day, multi-day, and time-based events with proper timezone conversion and end dates.
+  - Added date formatting helpers in `utils.js` to display time-based appointments ('Di 25.08.2026, 14:30 (2,5 Std.)') and multi-day appointments ('Di 25.08.2026 bis Do 27.08.2026 (3 Tage)') on the dashboard.
+
 ## [2026-07-12 13:14]
 - Expanded E2E test suite with security and audit log coverages:
   - Added XSS escaping verification tests for appointment title/description rendering.

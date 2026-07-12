@@ -18,6 +18,10 @@ Willkommen bei **Skedulo**! Diese Webanwendung bietet dir eine einfache und übe
 
 ### 📅 Terminkalender
 * **Termine erstellen, bearbeiten & löschen:** Plane deine Tage ganz einfach. Du kannst einen Titel, das Datum, den Ort und ausführliche Notizen angeben.
+* **Flexible Termintypen:**
+  * **Ganztägig (Standard):** Plane ganztägige Termine für einen bestimmten Tag.
+  * **Mit Uhrzeit:** Gib eine Startzeit und eine Dauer in Stunden (z. B. 2,5 Std.) ein.
+  * **Mehrtägig:** Erstelle Termine, die sich über mehrere Tage erstrecken, und gib die Dauer in Tagen (z. B. 3 Tage) ein.
 * **Persönliche Icons (Emojis):** Verleihe deinen Terminen eine persönliche Note, indem du ein passendes Emoji (z. B. 🌴 für Urlaub oder 💻 für Arbeit) auswählst.
 * **Symbol-Filter (AJAX-basiert):** Filtere deinen Kalender blitzschnell im Browser nach bestimmten Emojis (z. B. nur Arbeitstermine oder private Termine anzeigen). Auf dem Desktop nutzt du eine praktische Icon-Leiste, auf dem Smartphone ein kompaktes Dropdown-Menü.
 * **Vergangene Termine:** Behalte den Überblick über vergangene Ereignisse in einem einklappbaren Archiv.

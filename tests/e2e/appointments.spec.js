@@ -70,6 +70,108 @@ test.describe('Calendar & Appointments', () => {
     await expect(page.locator('#upcoming-tbody tr', { hasText: 'Projekt-Meeting' })).not.toBeVisible();
   });
 
+  test('should create, read, update, and delete a time-based appointment', async ({ page }) => {
+    // 1. Create Time-based Appointment
+    await page.click('#add-appointment-btn');
+    await expect(page.locator('#appointment-modal')).toHaveClass(/active/);
+
+    await page.fill('#title', 'Zeit-Meeting');
+    await page.fill('#location', 'Raum B');
+    await page.fill('#notes', 'Besprechung mit Zeitangabe.');
+    
+    await page.evaluate(() => {
+      document.getElementById('appointment_date')._flatpickr.setDate('2026-08-25');
+    });
+
+    // Select time-based radio
+    await page.check('input[name="appointment_type"][value="time_based"]');
+    await page.fill('#start_time', '14:30');
+    await page.fill('#duration_hours', '2.5');
+
+    // Save
+    await page.click('#save-btn');
+    await expect(page.locator('#appointment-modal')).not.toHaveClass(/active/);
+
+    // Verify in upcoming table: Di25.08.2026, 14:30 (2,5 Std.)
+    const upcomingRow = page.locator('#upcoming-tbody tr', { hasText: 'Zeit-Meeting' });
+    await expect(upcomingRow).toBeVisible();
+    await expect(upcomingRow.locator('.cell-date')).toContainText('Di25.08.2026, 14:30 (2,5 Std.)');
+
+    // 2. Edit/Update it to 3 hours
+    await upcomingRow.click();
+    await expect(page.locator('#appointment-modal')).toHaveClass(/active/);
+    await expect(page.locator('input[name="appointment_type"][value="time_based"]')).toBeChecked();
+    await expect(page.locator('#start_time')).toHaveValue('14:30');
+    await expect(page.locator('#duration_hours')).toHaveValue('2.5');
+
+    await page.fill('#duration_hours', '3');
+    await page.click('#save-btn');
+    await expect(page.locator('#appointment-modal')).not.toHaveClass(/active/);
+
+    // Verify updated display: Di25.08.2026, 14:30 (3 Std.)
+    const updatedRow = page.locator('#upcoming-tbody tr', { hasText: 'Zeit-Meeting' });
+    await expect(updatedRow.locator('.cell-date')).toContainText('Di25.08.2026, 14:30 (3 Std.)');
+
+    // 3. Delete it
+    await updatedRow.click();
+    await page.click('#delete-btn');
+    await expect(page.locator('#confirm-overlay')).toHaveClass(/active/);
+    await page.click('#confirm-delete-btn');
+
+    // Verify it is gone
+    await expect(page.locator('#upcoming-tbody tr', { hasText: 'Zeit-Meeting' })).not.toBeVisible();
+  });
+
+  test('should create, read, update, and delete a multi-day appointment', async ({ page }) => {
+    // 1. Create Multi-day Appointment
+    await page.click('#add-appointment-btn');
+    await expect(page.locator('#appointment-modal')).toHaveClass(/active/);
+
+    await page.fill('#title', 'Mehrtägiger Urlaub');
+    await page.fill('#location', 'Ostsee');
+    await page.fill('#notes', 'Entspannung pur.');
+    
+    await page.evaluate(() => {
+      document.getElementById('appointment_date')._flatpickr.setDate('2026-08-25');
+    });
+
+    // Select multi-day radio
+    await page.check('input[name="appointment_type"][value="multi_day"]');
+    await page.fill('#duration_days', '3');
+
+    // Save
+    await page.click('#save-btn');
+    await expect(page.locator('#appointment-modal')).not.toHaveClass(/active/);
+
+    // Verify in upcoming table: Di25.08.2026 bis Do27.08.2026 (3 Tage)
+    const upcomingRow = page.locator('#upcoming-tbody tr', { hasText: 'Mehrtägiger Urlaub' });
+    await expect(upcomingRow).toBeVisible();
+    await expect(upcomingRow.locator('.cell-date')).toContainText('Di25.08.2026 bis Do27.08.2026 (3 Tage)');
+
+    // 2. Edit/Update it to 4 days
+    await upcomingRow.click();
+    await expect(page.locator('#appointment-modal')).toHaveClass(/active/);
+    await expect(page.locator('input[name="appointment_type"][value="multi_day"]')).toBeChecked();
+    await expect(page.locator('#duration_days')).toHaveValue('3');
+
+    await page.fill('#duration_days', '4');
+    await page.click('#save-btn');
+    await expect(page.locator('#appointment-modal')).not.toHaveClass(/active/);
+
+    // Verify updated display: Di25.08.2026 bis Fr28.08.2026 (4 Tage)
+    const updatedRow = page.locator('#upcoming-tbody tr', { hasText: 'Mehrtägiger Urlaub' });
+    await expect(updatedRow.locator('.cell-date')).toContainText('Di25.08.2026 bis Fr28.08.2026 (4 Tage)');
+
+    // 3. Delete it
+    await updatedRow.click();
+    await page.click('#delete-btn');
+    await expect(page.locator('#confirm-overlay')).toHaveClass(/active/);
+    await page.click('#confirm-delete-btn');
+
+    // Verify it is gone
+    await expect(page.locator('#upcoming-tbody tr', { hasText: 'Mehrtägiger Urlaub' })).not.toBeVisible();
+  });
+
   test('should filter appointments by emoji', async ({ page }) => {
     // Create first appointment with emoji 🌴
     await page.click('#add-appointment-btn');
