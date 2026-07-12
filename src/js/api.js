@@ -90,12 +90,12 @@ export function uploadFileAPI(formData) {
 }
 
 export function fetchAdminUsers() {
-    return fetch('admin_api.php?action=users')
+    return fetch('admin_api.php?action=list_users')
         .then(res => res.json());
 }
 
 export function toggleUserStatus(id, active) {
-    const action = active ? 'activate' : 'deactivate';
+    const action = active ? 'activate_user' : 'deactivate_user';
     return fetch(`admin_api.php?action=${action}&id=${id}`, {
         method: 'POST'
     })
@@ -110,7 +110,7 @@ export function resetUserPassword(id) {
 }
 
 export function createAdminUser(formData) {
-    return fetch('admin_api.php?action=create_user', {
+    return fetch('admin_api.php?action=add_user', {
         method: 'POST',
         body: formData
     })
