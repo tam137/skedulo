@@ -107,4 +107,82 @@ test.describe('Calendar & Appointments', () => {
     await expect(page.locator('#upcoming-tbody tr', { hasText: 'Sommerurlaub' })).toBeVisible();
     await expect(page.locator('#upcoming-tbody tr', { hasText: 'Codingsession' })).toBeVisible();
   });
+
+  test('should escape inputs and prevent XSS payload execution', async ({ page }) => {
+    await page.click('#add-appointment-btn');
+    
+    const xssTitle = '<script id="xss-title-test">alert("xss-title")</script>';
+    const xssNotes = '<div id="xss-notes-test">xss-notes</div>';
+    
+    await page.fill('#title', xssTitle);
+    await page.fill('#notes', xssNotes);
+    await page.evaluate(() => {
+      document.getElementById('appointment_date')._flatpickr.setDate('2026-10-18');
+    });
+    await page.click('#save-btn');
+    await expect(page.locator('#appointment-modal')).not.toHaveClass(/active/);
+
+    // Verify it is displayed in the list as text
+    const appointmentRow = page.locator('#upcoming-tbody tr', { hasText: 'xss-title' });
+    await expect(appointmentRow).toBeVisible();
+
+    // Verify script element does not exist in DOM
+    const xssScriptElement = page.locator('#xss-title-test');
+    await expect(xssScriptElement).not.toBeAttached();
+
+    // Reopen modal and verify notes
+    await appointmentRow.click();
+    await expect(page.locator('#appointment-modal')).toHaveClass(/active/);
+
+    // Verify div tag does not render as an actual HTML tag, but is escaped in text area or display
+    await expect(page.locator('#notes')).toHaveValue(xssNotes);
+    const xssDivElement = page.locator('#xss-notes-test');
+    await expect(xssDivElement).not.toBeAttached();
+
+    await page.click('#cancel-modal-btn');
+  });
+
+  test('should display change history log in the edit modal', async ({ page }) => {
+    // 1. Create an appointment
+    await page.click('#add-appointment-btn');
+    await page.fill('#title', 'Original Title');
+    await page.fill('#location', 'Original Location');
+    await page.evaluate(() => {
+      document.getElementById('appointment_date')._flatpickr.setDate('2026-10-20');
+    });
+    await page.click('#save-btn');
+    await expect(page.locator('#appointment-modal')).not.toHaveClass(/active/);
+
+    // 2. Edit the title and location
+    const row = page.locator('#upcoming-tbody tr', { hasText: 'Original Title' });
+    await expect(row).toBeVisible();
+    await row.click();
+    await expect(page.locator('#appointment-modal')).toHaveClass(/active/);
+
+    await page.fill('#title', 'Updated Title');
+    await page.fill('#location', 'Updated Location');
+    await page.click('#save-btn');
+    await expect(page.locator('#appointment-modal')).not.toHaveClass(/active/);
+
+    // 3. Re-open and check the history log
+    const updatedRow = page.locator('#upcoming-tbody tr', { hasText: 'Updated Title' });
+    await expect(updatedRow).toBeVisible();
+    await updatedRow.click();
+    await expect(page.locator('#appointment-modal')).toHaveClass(/active/);
+
+    // Click the toggle to expand history log
+    const historySummary = page.locator('#history-details summary');
+    await expect(historySummary).toBeVisible();
+    await historySummary.click();
+
+    // Asserts history displays title and location updates
+    const historyContent = page.locator('#history-content');
+    await expect(historyContent).toBeVisible();
+    await expect(historyContent).toContainText('Original Title');
+    await expect(historyContent).toContainText('Updated Title');
+    await expect(historyContent).toContainText('Original Location');
+    await expect(historyContent).toContainText('Updated Location');
+
+    await page.click('#cancel-modal-btn');
+  });
 });

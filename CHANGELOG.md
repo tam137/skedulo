@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026-07-12 13:14]
+- Expanded E2E test suite with security and audit log coverages:
+  - Added XSS escaping verification tests for appointment title/description rendering.
+  - Added E2E tests for the appointment change history audit log collapsible inside the edit modal.
+  - Added E2E tests for cross-user isolated file storage, verifying different users can upload files with the same name without overwriting.
+  - Added E2E tests verifying user last login timestamps are recorded and displayed correctly in the admin panel user table.
+
 ## [2026-07-12 12:59]
 - Expanded E2E test suite and resolved backend update actions:
   - Added new test suite `tests/e2e/calendar.spec.js` covering iCalendar (`calendar_feed.php`) feed format, token authentication, and empty token validations.

@@ -137,4 +137,43 @@ test.describe('Admin Operations & Password Change', () => {
     await expect(page).toHaveURL(/.*dashboard\.php/);
     await page.waitForSelector('#appointment-sharing-select .multiselect-trigger');
   });
+
+  test('should update last login timestamp when user logs in', async ({ browser }) => {
+    // 1. Log in as user_b to update their last login time
+    const contextUser = await browser.newContext();
+    const pageUser = await contextUser.newPage();
+    await pageUser.goto('/login.php');
+    await pageUser.fill('#username', 'user_b');
+    await pageUser.fill('#password', 'Start123!');
+    await pageUser.click('#btn-login');
+    await pageUser.waitForSelector('#appointment-sharing-select .multiselect-trigger');
+    await contextUser.close();
+
+    // 2. Log in as admin to verify the last login field
+    const contextAdmin = await browser.newContext();
+    const pageAdmin = await contextAdmin.newPage();
+    await pageAdmin.goto('/login.php');
+    await pageAdmin.fill('#username', 'admin_test');
+    await pageAdmin.fill('#password', 'Start123!');
+    await pageAdmin.click('#btn-login');
+    await pageAdmin.waitForSelector('#appointment-sharing-select .multiselect-trigger');
+
+    // Go to admin view
+    await pageAdmin.click('#hamburger-btn');
+    await pageAdmin.waitForTimeout(400);
+    await pageAdmin.click('#nav-admin');
+    await expect(pageAdmin.locator('#admin-view')).not.toHaveClass(/hidden/);
+
+    // Get the user row for user_b in users-tbody
+    const userRow = pageAdmin.locator('#users-tbody tr', { hasText: 'user_b' });
+    await expect(userRow).toBeVisible();
+
+    // Verify the "Letzter Login" column (td:nth-child(4)) is not "-" and contains dynamic relative/date text
+    const lastLoginCell = userRow.locator('td:nth-child(4)');
+    await expect(lastLoginCell).not.toHaveText('-');
+    const cellText = await lastLoginCell.innerText();
+    expect(cellText.length).toBeGreaterThan(2);
+
+    await contextAdmin.close();
+  });
 });

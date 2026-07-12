@@ -125,4 +125,73 @@ test.describe('File Manager & Uploads', () => {
     // Verify "Termin" column is back to "-"
     await expect(fileRow.locator('td:nth-child(2)')).toContainText('-');
   });
+
+  test('should allow different users to upload files with the same name without overwriting each other', async ({ browser }) => {
+    // 1. User A uploads "shared_name.txt" containing "Top Secret A"
+    const contextA = await browser.newContext();
+    const pageA = await contextA.newPage();
+    await pageA.goto('/login.php');
+    await pageA.fill('#username', 'user_a');
+    await pageA.fill('#password', 'Start123!');
+    await pageA.click('#btn-login');
+    await pageA.waitForSelector('#appointment-sharing-select .multiselect-trigger');
+
+    await pageA.click('#hamburger-btn');
+    await pageA.waitForTimeout(400);
+    await pageA.click('#nav-files');
+    await expect(pageA.locator('#files-view')).not.toHaveClass(/hidden/);
+
+    await pageA.click('#upload-global-file-btn');
+    await pageA.setInputFiles('#global-upload-file-field', {
+      name: 'shared_name.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('Top Secret A')
+    });
+    await pageA.click('#save-upload-modal-btn');
+    await expect(pageA.locator('#upload-file-modal')).not.toHaveClass(/active/);
+
+    const rowA = pageA.locator('#files-tbody tr', { hasText: 'shared_name.txt' });
+    await expect(rowA).toBeVisible();
+    const fileIdA = await rowA.getAttribute('data-id');
+
+    // 2. User B uploads "shared_name.txt" containing "Top Secret B"
+    const contextB = await browser.newContext();
+    const pageB = await contextB.newPage();
+    await pageB.goto('/login.php');
+    await pageB.fill('#username', 'user_b');
+    await pageB.fill('#password', 'Start123!');
+    await pageB.click('#btn-login');
+    await pageB.waitForSelector('#appointment-sharing-select .multiselect-trigger');
+
+    await pageB.click('#hamburger-btn');
+    await pageB.waitForTimeout(400);
+    await pageB.click('#nav-files');
+    await expect(pageB.locator('#files-view')).not.toHaveClass(/hidden/);
+
+    await pageB.click('#upload-global-file-btn');
+    await pageB.setInputFiles('#global-upload-file-field', {
+      name: 'shared_name.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('Top Secret B')
+    });
+    await pageB.click('#save-upload-modal-btn');
+    await expect(pageB.locator('#upload-file-modal')).not.toHaveClass(/active/);
+
+    const rowB = pageB.locator('#files-tbody tr', { hasText: 'shared_name.txt' });
+    await expect(rowB).toBeVisible();
+    const fileIdB = await rowB.getAttribute('data-id');
+
+    // 3. Verify download content for User B is "Top Secret B"
+    const responseB = await contextB.request.get(`/files_api.php?action=download&id=${fileIdB}`);
+    expect(responseB.status()).toBe(200);
+    expect(await responseB.text()).toContain('Top Secret B');
+
+    // 4. Verify download content for User A is "Top Secret A"
+    const responseA = await contextA.request.get(`/files_api.php?action=download&id=${fileIdA}`);
+    expect(responseA.status()).toBe(200);
+    expect(await responseA.text()).toContain('Top Secret A');
+
+    await contextA.close();
+    await contextB.close();
+  });
 });
