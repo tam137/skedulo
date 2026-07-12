@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026-07-12 11:25]
+- Added AJAX symbol filter to the calendar dashboard:
+  - Designed responsive filter layout: horizontal emoji button bar on desktop, automatic select dropdown menu on mobile screens (< 768px).
+  - Maintained local caches for both upcoming (`cachedAppointments`) and past (`cachedPastAppointments`) appointments to enable instantaneous filtering.
+  - Implemented dynamic frontend filter logic synchronizing active selection between desktop and mobile controls.
+  - Allowed toggle behavior where clicking an already active symbol on desktop resets the filter.
+
 ## [2026-07-11 18:43]
 - Restricted editing of appointment sharing permissions and deletion of appointments to their creator:
   - Passed the logged-in user's ID from PHP to the HTML body tag using a data attribute.

@@ -19,6 +19,7 @@ Willkommen bei **Skedulo**! Diese Webanwendung bietet dir eine einfache und übe
 ### 📅 Terminkalender
 * **Termine erstellen, bearbeiten & löschen:** Plane deine Tage ganz einfach. Du kannst einen Titel, das Datum, den Ort und ausführliche Notizen angeben.
 * **Persönliche Icons (Emojis):** Verleihe deinen Terminen eine persönliche Note, indem du ein passendes Emoji (z. B. 🌴 für Urlaub oder 💻 für Arbeit) auswählst.
+* **Symbol-Filter (AJAX-basiert):** Filtere deinen Kalender blitzschnell im Browser nach bestimmten Emojis (z. B. nur Arbeitstermine oder private Termine anzeigen). Auf dem Desktop nutzt du eine praktische Icon-Leiste, auf dem Smartphone ein kompaktes Dropdown-Menü.
 * **Vergangene Termine:** Behalte den Überblick über vergangene Ereignisse in einem einklappbaren Archiv.
 * **Kalender abonnieren (Outlook/ICS):** Du kannst deine Termine über einen sicheren Link ganz einfach in Outlook, Apple Kalender oder Google Kalender abonnieren (Nur-Lese-Zugriff).
 

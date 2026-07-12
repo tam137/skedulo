@@ -22,6 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const emojiPicker = document.getElementById('emoji-picker');
     const emojiBtns = emojiPicker.querySelectorAll('.emoji-btn');
     
+    // Filter Elements
+    const filterEmojiBar = document.getElementById('filter-emoji-bar');
+    const filterEmojiBtns = filterEmojiBar ? filterEmojiBar.querySelectorAll('.filter-emoji-btn') : [];
+    const filterEmojiSelect = document.getElementById('filter-emoji-select');
+
     // Buttons
     const addBtn = document.getElementById('add-appointment-btn');
     const closeModalBtn = document.getElementById('close-modal-btn');
@@ -345,6 +350,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let fileSharingSelect = null;
     let editFileSharingSelect = null;
     let cachedAppointments = [];
+    let cachedPastAppointments = [];
+    let currentEmojiFilter = 'all';
 
     function fetchUsers() {
         fetch('appointments_api.php?action=users')
@@ -479,12 +486,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 cachedAppointments = data.upcoming || [];
-                renderTable(data.upcoming, 'upcoming-tbody', 'Lade Termine...', 'Keine anstehenden Termine vorhanden.');
-                renderTable(data.past, 'past-tbody', 'Lade Termine...', 'Keine vergangenen Termine vorhanden.');
+                cachedPastAppointments = data.past || [];
+                applyFilters();
             })
             .catch(err => {
                 console.error('Error loading appointments:', err);
             });
+    }
+
+    function applyFilters() {
+        let filteredUpcoming = cachedAppointments;
+        let filteredPast = cachedPastAppointments;
+
+        if (currentEmojiFilter !== 'all') {
+            filteredUpcoming = cachedAppointments.filter(apt => (apt.icon || '') === currentEmojiFilter);
+            filteredPast = cachedPastAppointments.filter(apt => (apt.icon || '') === currentEmojiFilter);
+        }
+
+        renderTable(filteredUpcoming, 'upcoming-tbody', 'Lade Termine...', 'Keine anstehenden Termine vorhanden.');
+        renderTable(filteredPast, 'past-tbody', 'Lade Termine...', 'Keine vergangenen Termine vorhanden.');
     }
 
     function renderTable(appointments, tbodyId, loadingText, emptyText) {
@@ -771,6 +791,52 @@ document.addEventListener('DOMContentLoaded', () => {
             appointmentIconInput.value = btn.dataset.emoji;
         });
     });
+    
+    // Symbol Filter Handlers
+    if (filterEmojiBtns.length > 0) {
+        filterEmojiBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetEmoji = btn.dataset.emoji;
+                
+                if (btn.classList.contains('active')) {
+                    // Clicked an already active emoji -> Reset filter
+                    btn.classList.remove('active');
+                    currentEmojiFilter = 'all';
+                    if (filterEmojiSelect) {
+                        filterEmojiSelect.value = 'all';
+                    }
+                } else {
+                    // Clicked a new emoji -> Apply filter
+                    filterEmojiBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentEmojiFilter = targetEmoji;
+                    if (filterEmojiSelect) {
+                        filterEmojiSelect.value = targetEmoji;
+                    }
+                }
+                
+                applyFilters();
+            });
+        });
+    }
+
+    if (filterEmojiSelect) {
+        filterEmojiSelect.addEventListener('change', () => {
+            const selectedVal = filterEmojiSelect.value;
+            currentEmojiFilter = selectedVal;
+            
+            // Sync desktop buttons
+            filterEmojiBtns.forEach(btn => {
+                if (selectedVal !== 'all' && btn.dataset.emoji === selectedVal) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            applyFilters();
+        });
+    }
     
     deleteBtn.addEventListener('click', () => {
         const id = appointmentIdInput.value;

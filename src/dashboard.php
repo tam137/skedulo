@@ -139,6 +139,38 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 </button>
             </div>
 
+            <!-- Symbol Filter -->
+            <div class="calendar-filter-container">
+                <span class="filter-label">Filter nach Symbol:</span>
+                
+                <!-- Desktop Emoji Bar -->
+                <div class="filter-emoji-bar" id="filter-emoji-bar">
+                    <button type="button" class="filter-emoji-btn" data-emoji="❤️" title="Herz">❤️</button>
+                    <button type="button" class="filter-emoji-btn" data-emoji="🏃‍♀️" title="Sportlerin">🏃‍♀️</button>
+                    <button type="button" class="filter-emoji-btn" data-emoji="💃" title="Tanzende Person">💃</button>
+                    <button type="button" class="filter-emoji-btn" data-emoji="🌴" title="Urlaubspalme">🌴</button>
+                    <button type="button" class="filter-emoji-btn" data-emoji="💻" title="Arbeitslaptop">💻</button>
+                    <button type="button" class="filter-emoji-btn" data-emoji="🩺" title="Stethoskop">🩺</button>
+                    <button type="button" class="filter-emoji-btn" data-emoji="🐱" title="Katze">🐱</button>
+                    <button type="button" class="filter-emoji-btn" data-emoji="🏠" title="Familie/Zuhause">🏠</button>
+                    <button type="button" class="filter-emoji-btn" data-emoji="🧑‍🤝‍🧑" title="Freunde">🧑‍🤝‍🧑</button>
+                </div>
+                
+                <!-- Mobile Select Dropdown -->
+                <select class="filter-emoji-select" id="filter-emoji-select">
+                    <option value="all">Alle anzeigen</option>
+                    <option value="❤️">❤️ Herz</option>
+                    <option value="🏃‍♀️">🏃‍♀️ Sportlerin</option>
+                    <option value="💃">💃 Tanzende Person</option>
+                    <option value="🌴">🌴 Urlaubspalme</option>
+                    <option value="💻">💻 Arbeitslaptop</option>
+                    <option value="🩺">🩺 Stethoskop</option>
+                    <option value="🐱">🐱 Katze</option>
+                    <option value="🏠">🏠 Familie/Zuhause</option>
+                    <option value="🧑‍🤝‍🧑">🧑‍🤝‍🧑 Freunde</option>
+                </select>
+            </div>
+
             <!-- Upcoming Appointments -->
             <div class="table-container">
                 <table class="appointments-table" id="upcoming-table">
