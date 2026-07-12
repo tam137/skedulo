@@ -1,6 +1,6 @@
 # Server-Dokumentation & Agenten-Leitfaden (AGENTS.md)
 
-Diese Datei dient als zentraler Einstiegspunkt für zukünftige KI-Agenten, die auf diesem Server arbeiten. Sie beschreibt die Serverarchitektur, den aktuellen Zustand und die Richtlinien für die Wartung.
+Diese Datei dient als zentraler Einstiegspunkt für alle zukünftigen KI-Agenten, die auf diesem Server arbeiten. Sie beschreibt die Serverarchitektur, den aktuellen Zustand und die Richtlinien für die Wartung.
 
 > [!IMPORTANT]
 > **Pflegepflicht für Agenten:** Jeder Agent, der Änderungen am Server oder an den Konfigurationen vornimmt, **muss** diese Datei (`AGENTS.md`) und die zugehörigen Dokumente/Skripte im Ordner `agent-workflow/` aktuell halten. Das Ziel ist eine effiziente und fehlerfreie Zusammenarbeit über verschiedene Agenten-Sitzungen hinweg.
