@@ -1,4 +1,4 @@
-import { escapeHtml } from './utils.js';
+import { escapeHtml } from '../utils.js';
 
     class CustomMultiSelect {
         constructor(elementId, placeholderText = 'Benutzer auswählen...') {
