@@ -394,6 +394,9 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 <div class="form-group multi-day-fields" id="multi-day-fields" style="display: none;">
                     <label for="duration_days" class="form-label">Dauer (Tage)</label>
                     <input type="number" id="duration_days" name="duration_days" class="form-input form-input-no-icon" min="2" step="1" placeholder="z.B. 3">
+                    <div id="duration-days-error" class="form-hint" style="color: var(--error); display: none; margin-top: 6px; font-weight: 500;">
+                        Ein Mehrtagestermin muss mindestens 2 Tage dauern.
+                    </div>
                 </div>
 
                 <div class="form-group">

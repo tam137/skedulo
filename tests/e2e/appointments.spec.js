@@ -85,7 +85,9 @@ test.describe('Calendar & Appointments', () => {
 
     // Select time-based radio
     await page.check('input[name="appointment_type"][value="time_based"]');
-    await page.fill('#start_time', '14:30');
+    await page.evaluate(() => {
+      document.getElementById('start_time')._flatpickr.setDate('14:30');
+    });
     await page.fill('#duration_hours', '2.5');
 
     // Save
@@ -170,6 +172,44 @@ test.describe('Calendar & Appointments', () => {
 
     // Verify it is gone
     await expect(page.locator('#upcoming-tbody tr', { hasText: 'Mehrtägiger Urlaub' })).not.toBeVisible();
+  });
+
+  test('should validate start-time default and multi-day duration limits', async ({ page }) => {
+    await page.click('#add-appointment-btn');
+    await expect(page.locator('#appointment-modal')).toHaveClass(/active/);
+
+    // 1. Verify start-time defaults to 08:00
+    await page.check('input[name="appointment_type"][value="time_based"]');
+    await expect(page.locator('#start_time')).toHaveValue('08:00');
+
+    // 2. Verify multi-day duration error validation (entering 1 day)
+    await page.check('input[name="appointment_type"][value="multi_day"]');
+    await page.fill('#title', 'Kurzer Test-Mehrtagestermin');
+    await page.fill('#duration_days', '1');
+    
+    // Trigger input validation check
+    await expect(page.locator('#duration-days-error')).toBeVisible();
+
+    // Try to save and verify it fails (modal remains open)
+    await page.click('#save-btn');
+    await expect(page.locator('#appointment-modal')).toHaveClass(/active/);
+
+    // Change duration to 2 (valid) and verify error goes away and saves successfully
+    await page.fill('#duration_days', '2');
+    await expect(page.locator('#duration-days-error')).not.toBeVisible();
+
+    await page.evaluate(() => {
+      document.getElementById('appointment_date')._flatpickr.setDate('2026-08-25');
+    });
+    await page.click('#save-btn');
+    await expect(page.locator('#appointment-modal')).not.toHaveClass(/active/);
+
+    // Clean up
+    const row = page.locator('#upcoming-tbody tr', { hasText: 'Kurzer Test-Mehrtagestermin' });
+    await expect(row).toBeVisible();
+    await row.click();
+    await page.click('#delete-btn');
+    await page.click('#confirm-delete-btn');
   });
 
   test('should filter appointments by emoji', async ({ page }) => {
