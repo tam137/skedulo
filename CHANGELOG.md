@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026-07-12 12:59]
+- Expanded E2E test suite and resolved backend update actions:
+  - Added new test suite `tests/e2e/calendar.spec.js` covering iCalendar (`calendar_feed.php`) feed format, token authentication, and empty token validations.
+  - Added test cases verifying file-to-appointment association updates and unlinking.
+  - Added test cases verifying file download security boundaries, confirming unauthorized download requests return HTTP 403.
+  - Fixed action mapping inside `files_api.php` by correctly routing `action=save` to the backend `update` action.
+
 ## [2026-07-12 12:35]
 - Implemented E2E test suite and resolved third-party CDN dependencies:
   - Vendored Flatpickr assets locally (`css/flatpickr.min.css`, `css/flatpickr-dark.css`, `js/vendor/flatpickr.js`, `js/vendor/flatpickr-de.js`) to remove dependency on external CDNs.

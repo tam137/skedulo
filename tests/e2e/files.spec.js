@@ -62,4 +62,67 @@ test.describe('File Manager & Uploads', () => {
     await fileRow.locator('.action-btn-delete').click();
     await expect(fileRow).not.toBeVisible();
   });
+
+  test('should associate a global file with an appointment and then unlink it', async ({ page }) => {
+    // Navigate back to dashboard first to create an appointment
+    await page.click('#hamburger-btn');
+    await page.waitForTimeout(400);
+    await page.click('#nav-calendar');
+    await expect(page.locator('#calendar-view')).not.toHaveClass(/hidden/);
+
+    // Create an appointment
+    await page.click('#add-appointment-btn');
+    await page.fill('#title', 'Linkable Event');
+    await page.evaluate(() => {
+      document.getElementById('appointment_date')._flatpickr.setDate('2026-12-01');
+    });
+    await page.click('#save-btn');
+    await expect(page.locator('#appointment-modal')).not.toHaveClass(/active/);
+
+    // Navigate to files tab
+    await page.click('#hamburger-btn');
+    await page.waitForTimeout(400);
+    await page.click('#nav-files');
+    await expect(page.locator('#files-view')).not.toHaveClass(/hidden/);
+
+    // 1. Upload a global file
+    await page.click('#upload-global-file-btn');
+    const filePayload = {
+      name: 'link_test_file.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('Link test file content')
+    };
+    await page.setInputFiles('#global-upload-file-field', filePayload);
+    await page.click('#save-upload-modal-btn');
+    await expect(page.locator('#upload-file-modal')).not.toHaveClass(/active/);
+
+    // Verify it is global (td:nth-child(2) should contain "-")
+    const fileRow = page.locator('#files-tbody tr', { hasText: 'link_test_file.txt' });
+    await expect(fileRow).toBeVisible();
+    await expect(fileRow.locator('td:nth-child(2)')).toContainText('-');
+
+    // 2. Open edit file modal
+    await fileRow.click();
+    await expect(page.locator('#edit-file-modal')).toHaveClass(/active/);
+
+    // Associate it with "Linkable Event"
+    await page.selectOption('#edit-appointment-field', { label: 'Linkable Event' });
+    await page.click('#save-edit-modal-btn');
+    await expect(page.locator('#edit-file-modal')).not.toHaveClass(/active/);
+
+    // Verify the "Termin" column now contains "Linkable Event"
+    await expect(fileRow.locator('td:nth-child(2)')).toContainText('Linkable Event');
+
+    // 3. Open edit file modal again and unlink it
+    await fileRow.click();
+    await expect(page.locator('#edit-file-modal')).toHaveClass(/active/);
+
+    // Unlink the file (select value "")
+    await page.selectOption('#edit-appointment-field', { value: '' });
+    await page.click('#save-edit-modal-btn');
+    await expect(page.locator('#edit-file-modal')).not.toHaveClass(/active/);
+
+    // Verify "Termin" column is back to "-"
+    await expect(fileRow.locator('td:nth-child(2)')).toContainText('-');
+  });
 });

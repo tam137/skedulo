@@ -35,6 +35,9 @@ $userId = $_SESSION['user_id'];
 $uploadDir = __DIR__ . '/uploads/';
 
 try {
+    if ($action === 'save') {
+        $action = 'update';
+    }
     switch ($action) {
         case 'upload':
             if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {

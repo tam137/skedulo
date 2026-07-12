@@ -81,4 +81,69 @@ test.describe('Sharing & Permissions', () => {
     // Close modal
     await page.click('#cancel-modal-btn');
   });
+
+  test('should enforce file sharing security boundaries for unauthorized users', async ({ browser }) => {
+    // 1. Create User A session and upload a file
+    const userAContext = await browser.newContext();
+    const pageA = await userAContext.newPage();
+    await pageA.goto('/login.php');
+    await pageA.fill('#username', 'user_a');
+    await pageA.fill('#password', 'Start123!');
+    await pageA.click('#btn-login');
+    await pageA.waitForSelector('#appointment-sharing-select .multiselect-trigger');
+
+    // Go to files, upload a file and share with user_b
+    await pageA.click('#hamburger-btn');
+    await pageA.waitForTimeout(400);
+    await pageA.click('#nav-files');
+
+    await pageA.click('#upload-global-file-btn');
+    await pageA.setInputFiles('#global-upload-file-field', {
+      name: 'secret_a.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('Top secret data A')
+    });
+
+    // Share with user_b
+    await pageA.click('#file-sharing-select .multiselect-trigger');
+    const optionUserB = pageA.locator('#file-sharing-select .multiselect-option', { hasText: 'user_b' });
+    await optionUserB.click();
+    await pageA.click('#file-sharing-select .multiselect-trigger');
+
+    await pageA.click('#save-upload-modal-btn');
+    await expect(pageA.locator('#upload-file-modal')).not.toHaveClass(/active/);
+
+    // Get the file ID of the uploaded file
+    const fileRow = pageA.locator('#files-tbody tr', { hasText: 'secret_a.txt' });
+    await expect(fileRow).toBeVisible();
+    const fileId = await fileRow.getAttribute('data-id');
+
+    // 2. Create User B session and download file (should succeed)
+    const userBContext = await browser.newContext();
+    const pageB = await userBContext.newPage();
+    await pageB.goto('/login.php');
+    await pageB.fill('#username', 'user_b');
+    await pageB.fill('#password', 'Start123!');
+    await pageB.click('#btn-login');
+    
+    const responseB = await userBContext.request.get(`/files_api.php?action=download&id=${fileId}`);
+    expect(responseB.status()).toBe(200);
+    expect(await responseB.text()).toContain('Top secret data A');
+
+    // 3. Create User C (admin_test) session and attempt download (should return 403 Forbidden)
+    const userCContext = await browser.newContext();
+    const pageC = await userCContext.newPage();
+    await pageC.goto('/login.php');
+    await pageC.fill('#username', 'admin_test');
+    await pageC.fill('#password', 'Start123!');
+    await pageC.click('#btn-login');
+
+    const responseC = await userCContext.request.get(`/files_api.php?action=download&id=${fileId}`);
+    expect(responseC.status()).toBe(403);
+    
+    // Clean up contexts
+    await userAContext.close();
+    await userBContext.close();
+    await userCContext.close();
+  });
 });
