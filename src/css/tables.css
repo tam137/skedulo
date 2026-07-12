@@ -60,7 +60,7 @@
 
 
 /* Exceptions for custom rendering on mobile */
-
+@media (max-width: 768px) {
     .appointments-table td.cell-date {
         font-size: 1rem;
         font-weight: 600;

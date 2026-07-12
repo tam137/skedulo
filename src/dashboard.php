@@ -52,7 +52,8 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
         'css/modals.css',
         'css/multiselect.css',
         'css/calendar.css',
-        'css/files.css'
+        'css/files.css',
+        'css/login.css'
     ];
     foreach ($css_files as $file) {
         if (file_exists($file)) {
