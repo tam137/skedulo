@@ -1,0 +1,112 @@
+/* Table Style */
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.01);
+    margin-bottom: 30px;
+}
+
+.appointments-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 600px;
+}
+
+.appointments-table th {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.appointments-table td {
+    padding: 16px;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.appointments-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.appointments-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.appointments-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.weekday-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 8px;
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--accent-blue);
+}
+
+
+/* Exceptions for custom rendering on mobile */
+
+    .appointments-table td.cell-date {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    
+    .appointments-table td.cell-date::before {
+        display: none;
+    }
+    
+    .appointments-table td.cell-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #ffffff;
+        padding-top: 8px;
+    }
+    
+    .appointments-table td.cell-title::before {
+        display: none;
+    }
+    
+    .weekday-tag {
+        margin-bottom: 4px;
+    }
+
+    .sidebar-drawer {
+        width: 100%;
+        right: -100%;
+    }
+    
+    .modal-card {
+        padding: 20px;
+        border-radius: 16px;
+    }
+}
+
+
+/* Table Empty State styling */
+
+.table-empty-message {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 30px;
+}
+
+.past-appointments-content .table-container {
+    border: none;
+    border-radius: 0;
+    margin-bottom: 0;
+}

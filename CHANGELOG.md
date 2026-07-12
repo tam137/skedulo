@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026-07-12 11:39]
+- Refactored frontend assets into modular ES6 Javascript and dedicated CSS files (Phase 1):
+  - Split `styles.css` into specific modular files (`variables.css`, `base.css`, `layout.css`, `forms.css`, `login.css`, `modals.css`, `tables.css`, `files.css`, `calendar.css`, `multiselect.css`).
+  - Added a dynamic PHP CSS loader in `dashboard.php` and `login.php` to prevent browser caching issues.
+  - Extracted utility functions into `src/js/utils.js` and `CustomMultiSelect` class into `src/js/components/CustomMultiSelect.js`.
+  - Converted the main frontend script to an ES6 module (`<script type="module" src="js/main.js">`).
 ## [2026-07-12 11:25]
 - Added AJAX symbol filter to the calendar dashboard:
   - Designed responsive filter layout: horizontal emoji button bar on desktop, automatic select dropdown menu on mobile screens (< 768px).

@@ -1,3 +1,6 @@
+import { formatAppointmentDate, formatDateOnly, formatDateSimple, escapeHtml, formatBytes } from './utils.js';
+import { CustomMultiSelect } from './components/CustomMultiSelect.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const currentUserId = parseInt(document.body.dataset.userId, 10);
 

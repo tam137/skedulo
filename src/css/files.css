@@ -1,0 +1,15 @@
+/* Styled custom file upload container and file name display */
+
+.custom-file-upload {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.file-name-display {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

@@ -41,7 +41,25 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
     <title>Terminkalender</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="alternate icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=<?php echo filemtime('styles.css'); ?>">
+
+    <?php
+    $css_files = [
+        'css/variables.css',
+        'css/base.css',
+        'css/layout.css',
+        'css/forms.css',
+        'css/tables.css',
+        'css/modals.css',
+        'css/multiselect.css',
+        'css/calendar.css',
+        'css/files.css'
+    ];
+    foreach ($css_files as $file) {
+        if (file_exists($file)) {
+            echo '<link rel="stylesheet" href="' . $file . '?v=' . filemtime($file) . '">' . "\n    ";
+        }
+    }
+    ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
 </head>
@@ -676,9 +694,7 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
 
     <!-- Flatpickr Library -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/de.js"></script>
-
-    <!-- JavaScript Logic -->
-    <script src="dashboard.js?v=<?php echo filemtime('dashboard.js'); ?>"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/de.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
