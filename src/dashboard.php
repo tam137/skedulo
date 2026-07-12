@@ -61,8 +61,8 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
         }
     }
     ?>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    <link rel="stylesheet" href="css/flatpickr.min.css">
+    <link rel="stylesheet" href="css/flatpickr-dark.css">
 </head>
 <body data-user-id="<?php echo (int)$user['id']; ?>">
     <!-- Drawer Backdrop -->
@@ -694,8 +694,8 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
     </div>
 
     <!-- Flatpickr Library -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/de.js"></script>
+    <script src="js/vendor/flatpickr.js"></script>
+    <script src="js/vendor/flatpickr-de.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

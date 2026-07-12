@@ -4,7 +4,11 @@ date_default_timezone_set('Europe/Berlin');
 
 // Secure session configuration
 ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_secure', 1); // requires HTTPS (configured on the server)
+$is_secure = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
+             (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+if ($is_secure) {
+    ini_set('session.cookie_secure', 1);
+}
 ini_set('session.use_only_cookies', 1);
 ini_set('session.cookie_samesite', 'Strict');
 

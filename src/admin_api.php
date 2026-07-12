@@ -30,9 +30,9 @@ try {
 
     $action = $_GET['action'] ?? '';
     
-    // Read JSON payload for POST requests
+    // Read JSON payload for POST requests, fallback to $_POST
     $input = file_get_contents('php://input');
-    $payload = json_decode($input, true);
+    $payload = json_decode($input, true) ?? $_POST;
 
     if ($action === 'list_users') {
         $stmt = $pdo->query("
@@ -86,7 +86,7 @@ try {
         }
 
         if ($action === 'reset_password') {
-            $id = $payload['id'] ?? null;
+            $id = $payload['id'] ?? $_GET['id'] ?? null;
             if (!$id) {
                 echo json_encode(['success' => false, 'error' => 'Ungültige Benutzer-ID.']);
                 exit;
@@ -104,7 +104,7 @@ try {
         }
 
         if ($action === 'deactivate_user' || $action === 'activate_user') {
-            $id = $payload['id'] ?? null;
+            $id = $payload['id'] ?? $_GET['id'] ?? null;
             if (!$id) {
                 echo json_encode(['success' => false, 'error' => 'Ungültige Benutzer-ID.']);
                 exit;

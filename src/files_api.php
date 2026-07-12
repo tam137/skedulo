@@ -258,7 +258,7 @@ try {
                 'success' => true,
                 'file' => [
                     'id' => $file['id'],
-                    'original_filename' => $file['original_filename'],
+                    'original_name' => $file['original_filename'],
                     'appointment_id' => $file['appointment_id'],
                     'allowed_users' => $allowed_users
                 ]
@@ -289,8 +289,8 @@ try {
                 }
 
                 $query = "
-                    SELECT f.id, f.appointment_id, f.original_filename, f.mime_type, f.file_size, f.uploaded_at, 
-                           acc.username as uploader_name, a.title as appointment_title
+                    SELECT f.id, f.appointment_id, f.original_filename as original_name, f.mime_type, f.file_size, f.uploaded_at, 
+                           acc.username as creator_name, f.uploaded_by as created_by, a.title as appointment_title
                     FROM files f
                     JOIN accounts acc ON f.uploaded_by = acc.id
                     LEFT JOIN appointments a ON f.appointment_id = a.id
@@ -302,8 +302,8 @@ try {
             } else {
                 // List all visible files for the user
                 $query = "
-                    SELECT f.id, f.appointment_id, f.original_filename, f.mime_type, f.file_size, f.uploaded_at, 
-                           acc.username as uploader_name, a.title as appointment_title
+                    SELECT f.id, f.appointment_id, f.original_filename as original_name, f.mime_type, f.file_size, f.uploaded_at, 
+                           acc.username as creator_name, f.uploaded_by as created_by, a.title as appointment_title
                     FROM files f
                     JOIN accounts acc ON f.uploaded_by = acc.id
                     LEFT JOIN appointments a ON f.appointment_id = a.id
@@ -424,7 +424,7 @@ try {
             break;
             
         case 'delete':
-            $id = intval($input['id'] ?? 0);
+            $id = intval($_GET['id'] ?? $input['id'] ?? 0);
             if ($id <= 0) throw new Exception('Ungültige ID.');
             
             $stmt = $pdo->prepare("SELECT appointment_id, original_filename, storage_filename, uploaded_by FROM files WHERE id = :id");

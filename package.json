@@ -1,0 +1,12 @@
+{
+  "name": "skedulo-tests",
+  "version": "1.0.0",
+  "description": "E2E testing suite for Skedulo using Playwright",
+  "type": "module",
+  "scripts": {
+    "test": "./tests/run-tests.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.1"
+  }
+}

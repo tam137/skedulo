@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026-07-12 12:35]
+- Implemented E2E test suite and resolved third-party CDN dependencies:
+  - Vendored Flatpickr assets locally (`css/flatpickr.min.css`, `css/flatpickr-dark.css`, `js/vendor/flatpickr.js`, `js/vendor/flatpickr-de.js`) to remove dependency on external CDNs.
+  - Setup Playwright testing suite covering auth, appointments, file manager, sharing permission boundaries, and admin operations.
+  - Fixed database session cookie lockout during local HTTP testing inside `auth_helper.php`.
+  - Fixed API parameter mismatches: mapped `action=save` to `create`/`update` in `appointments_api.php`, allowed delete actions to fallback to `$_GET['id']`, and enabled `admin_api.php` to support standard FormData POST payloads.
+  - Fixed database column naming differences between files query output and frontend rendering expectations (`original_name`, `creator_name`, `created_by`).
+
 ## [2026-07-12 12:00]
 - Aligned frontend with Separation of Concerns guidelines by removing all inline CSS:
   - Created modular classes (`.font-medium`, `.cell-notes`, `.current-account-label`, `.empty-list-text`, `.form-hint`) in CSS modules.

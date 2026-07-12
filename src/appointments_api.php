@@ -18,6 +18,11 @@ $userId = $_SESSION['user_id'];
 $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 $action = $_GET['action'] ?? $input['action'] ?? '';
 
+if ($action === 'save') {
+    $id = intval($input['id'] ?? 0);
+    $action = ($id > 0) ? 'update' : 'create';
+}
+
 try {
     switch ($action) {
         case 'users':
@@ -136,7 +141,8 @@ try {
 
             // Fetch attached files
             $stmtFiles = $pdo->prepare("
-                SELECT f.id, f.original_filename, f.mime_type, f.file_size, f.uploaded_at, acc.username as uploader_name
+                SELECT f.id, f.original_filename as original_name, f.mime_type, f.file_size, f.uploaded_at, 
+                       acc.username as creator_name, f.uploaded_by as created_by
                 FROM files f
                 JOIN accounts acc ON f.uploaded_by = acc.id
                 WHERE f.appointment_id = :id
@@ -193,15 +199,21 @@ try {
             $newId = $stmt->fetchColumn();
 
             // Insert sharing permissions
-            if (isset($input['allowed_users']) && is_array($input['allowed_users'])) {
-                $stmtPerm = $pdo->prepare("INSERT INTO appointment_permissions (appointment_id, account_id) VALUES (:appointment_id, :account_id)");
-                foreach ($input['allowed_users'] as $allowedUserId) {
-                    $allowedUserId = intval($allowedUserId);
-                    if ($allowedUserId !== $userId) {
-                        $stmtPerm->execute([
-                            'appointment_id' => $newId,
-                            'account_id' => $allowedUserId
-                        ]);
+            if (isset($input['allowed_users'])) {
+                $allowedUsers = $input['allowed_users'];
+                if (is_string($allowedUsers)) {
+                    $allowedUsers = json_decode($allowedUsers, true) ?? [];
+                }
+                if (is_array($allowedUsers)) {
+                    $stmtPerm = $pdo->prepare("INSERT INTO appointment_permissions (appointment_id, account_id) VALUES (:appointment_id, :account_id)");
+                    foreach ($allowedUsers as $allowedUserId) {
+                        $allowedUserId = intval($allowedUserId);
+                        if ($allowedUserId !== $userId) {
+                            $stmtPerm->execute([
+                                'appointment_id' => $newId,
+                                'account_id' => $allowedUserId
+                            ]);
+                        }
                     }
                 }
             }
@@ -330,6 +342,14 @@ try {
             }
 
             // Security check: Only the creator can change the sharing list
+            $allowedUsers = [];
+            if (isset($input['allowed_users'])) {
+                $allowedUsers = $input['allowed_users'];
+                if (is_string($allowedUsers)) {
+                    $allowedUsers = json_decode($allowedUsers, true) ?? [];
+                }
+            }
+
             if ($existing['created_by'] !== $userId) {
                 if (isset($input['allowed_users'])) {
                     // Fetch existing allowed users
@@ -338,7 +358,7 @@ try {
                     $currentAllowed = $stmtCurrentPerms->fetchAll(PDO::FETCH_COLUMN);
                     $currentAllowed = array_map('intval', $currentAllowed);
 
-                    $newAllowed = array_map('intval', $input['allowed_users']);
+                    $newAllowed = array_map('intval', $allowedUsers);
                     $newAllowed = array_filter($newAllowed, function($uid) use ($existing) {
                         return $uid !== intval($existing['created_by']);
                     });
@@ -355,9 +375,9 @@ try {
                 $stmtDelPerm = $pdo->prepare("DELETE FROM appointment_permissions WHERE appointment_id = :id");
                 $stmtDelPerm->execute(['id' => $id]);
 
-                if (isset($input['allowed_users']) && is_array($input['allowed_users'])) {
+                if (is_array($allowedUsers)) {
                     $stmtAddPerm = $pdo->prepare("INSERT INTO appointment_permissions (appointment_id, account_id) VALUES (:appointment_id, :account_id)");
-                    foreach ($input['allowed_users'] as $allowedUserId) {
+                    foreach ($allowedUsers as $allowedUserId) {
                         $allowedUserId = intval($allowedUserId);
                         if ($allowedUserId !== $existing['created_by']) { // creator always has access
                             $stmtAddPerm->execute([
@@ -379,7 +399,7 @@ try {
             break;
 
         case 'delete':
-            $id = intval($input['id'] ?? 0);
+            $id = intval($_GET['id'] ?? $input['id'] ?? 0);
             if ($id <= 0) {
                 throw new Exception('Ungültige Termin-ID.');
             }
