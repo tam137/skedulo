@@ -9,5 +9,5 @@ export const state = {
     editFileSharingSelect: null,
     currentDeleteId: null,
     adminActionType: null,
-    currentAdminActionUserId: null,
+    currentAdminActionUserId: null
 };

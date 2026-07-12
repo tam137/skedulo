@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026-07-12 11:51]
+- Refactored remaining monolithic JavaScript into decoupled ES6 modules (Phase 2):
+  - Extracted shared application state into `src/js/state.js`.
+  - Extracted all AJAX backend API requests into `src/js/api.js`.
+  - Grouped and isolated view-specific logic into dedicated modules under `src/js/modules/` (`navigation.js`, `appointments.js`, `files.js`, `admin.js`).
+  - Re-wired `main.js` as an orchestrator native entry point using decoupled event-driven patterns.
+
 ## [2026-07-12 11:39]
 - Refactored frontend assets into modular ES6 Javascript and dedicated CSS files (Phase 1):
   - Split `styles.css` into specific modular files (`variables.css`, `base.css`, `layout.css`, `forms.css`, `login.css`, `modals.css`, `tables.css`, `files.css`, `calendar.css`, `multiselect.css`).
