@@ -65,8 +65,32 @@ Die detaillierten Implementierungsschritte, der standardisierte PHP-Codeblock so
 
 Für eine saubere Strukturierung und langfristige Wartbarkeit des Projekts gilt die strikte Richtlinie der Separation of Concerns (Trennung von Belangen). Neuer Code sowie Refaktorierungen müssen diese Trennung einhalten:
 
-1. **JavaScript-Logik:** Gehört ausschließlich in separate `.js`-Dateien (z. B. `dashboard.js`) und darf nicht inline in PHP- oder HTML-Dateien eingebettet werden.
+1. **JavaScript-Logik:** Gehört ausschließlich in separate `.js`-Dateien und darf nicht inline in PHP- oder HTML-Dateien eingebettet werden.
 2. **Layout & Markup (HTML / PHP-Templates):** HTML und PHP-Strukturen verbleiben in den PHP-Dateien (z. B. `dashboard.php`). PHP sollte darin hauptsächlich für Templating-Logik, bedingte Renderings und die Einbindung der Backend-Sicherheitsprüfungen genutzt werden.
-3. **Styling & Design (CSS):** Inline-CSS (mittels `style="..."` im HTML oder direkter DOM-Modifikation `.style` in JavaScript) ist verboten. Alle Styles müssen über semantische und wiederverwendbare Klassen in der zentralen Datei `styles.css` definiert werden. Dynamische Zustandsänderungen im UI müssen in JavaScript über `.classList.add()` / `.classList.remove()` anstatt direkter CSS-Zuweisung umgesetzt werden.
+3. **Styling & Design (CSS):** Inline-CSS (mittels `style="..."` im HTML oder direkter DOM-Modifikation `.style` in JavaScript) ist verboten. Alle Styles müssen über semantische und wiederverwendbare Klassen in den modularisierten CSS-Dateien unter `src/css/` definiert werden. Dynamische Zustandsänderungen im UI müssen in JavaScript über `.classList.add()` / `.classList.remove()` anstatt direkter CSS-Zuweisung umgesetzt werden.
+
+---
+
+## 5. Etablierte Architekturprinzipien (Zwingend einzuhalten)
+
+Um die Code-Qualität hochzuhalten, müssen künftige KI-Agenten folgende etablierte Prinzipien bei Modifikationen wahren:
+
+### 1. Single Responsibility Principle (SRP)
+Jedes Modul hat eine eindeutige, isolierte Aufgabe. Mische keine Zuständigkeiten:
+- **`api.js`**: Hält alle asynchronen fetch-Requests an das Backend. Sie darf keine UI-Manipulationen durchführen.
+- **`state.js`**: Verwaltet den Client-seitigen App-Zustand. Keine direkte DOM-Modifikation.
+- **`utils.js`**: Reine Hilfsfunktionen (z. B. Formatierungen, Escaping) ohne Seiteneffekte.
+- **`modules/`**: Domänenspezifische Logik (z. B. `appointments.js` für Termine, `files.js` für Uploads).
+
+### 2. Modulares JavaScript (ES6-Module)
+Der JavaScript-Code ist modular organisiert. Nutze ausschließlich native ES6 `import`/`export` Anweisungen. Globale Fenster-Variablen (`window.xyz`) sind verboten.
+
+### 3. Event-Driven Architecture (Lose Kopplung)
+Zur Kommunikation zwischen den JavaScript-Modulen werden benutzerdefinierte Events (`CustomEvent`) verwendet:
+- Module feuern Events im globalen Kontext (z. B. `view-changed` bei Tab-Wechsel) ab.
+- Andere Module registrieren Event-Listener, um darauf zu reagieren und ihre Daten zu aktualisieren. Dies minimiert direkte Import-Abhängigkeiten.
+
+### 4. DRY (Don't Repeat Yourself) & Design Tokens
+Nutze für Styling-Anpassungen die CSS-Variablen aus `variables.css` und vermeide das Duplizieren von CSS-Regeln. Etabliere bei Bedarf wiederverwendbare Hilfsklassen in den CSS-Dateien (z. B. `.font-medium`, `.cell-notes`).
 
 
