@@ -383,7 +383,25 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                 <div class="form-row time-based-fields" id="time-based-fields" style="display: none;">
                     <div class="form-group">
                         <label for="start_time" class="form-label">Startzeit</label>
-                        <input type="time" id="start_time" name="start_time" class="form-input form-input-no-icon">
+                        <div class="time-picker-container">
+                            <input type="text" id="start_time" name="start_time" class="form-input form-input-no-icon" placeholder="08:00" autocomplete="off" maxlength="5">
+                            <div class="time-dropdown-panel" id="time-picker-dropdown">
+                                <div class="time-column" id="hours-column">
+                                    <div class="time-column-title">Std</div>
+                                    <?php for ($h = 0; $h < 24; $h++): ?>
+                                        <?php $hStr = str_pad($h, 2, '0', STR_PAD_LEFT); ?>
+                                        <div class="time-cell hour-cell" data-value="<?php echo $hStr; ?>"><?php echo $hStr; ?></div>
+                                    <?php endfor; ?>
+                                </div>
+                                <div class="time-column" id="minutes-column">
+                                    <div class="time-column-title">Min</div>
+                                    <div class="time-cell minute-cell" data-value="00">00</div>
+                                    <div class="time-cell minute-cell" data-value="15">15</div>
+                                    <div class="time-cell minute-cell" data-value="30">30</div>
+                                    <div class="time-cell minute-cell" data-value="45">45</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="duration_hours" class="form-label">Dauer (Stunden)</label>

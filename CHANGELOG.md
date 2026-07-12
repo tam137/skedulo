@@ -2,7 +2,7 @@
 
 ## [2026-07-12 16:36]
 - Added 24h format and 15-minute increments for start times and validation for multi-day duration:
-  - Initialized a Flatpickr time picker for `start_time` input to enforce a 24-hour European style clock with 15-minute steps and a default value of `08:00`.
+  - Replaced Flatpickr time picker with a custom HTML dropdown picker (two separate columns for hours and minutes in 15-minute increments), allowing the user to either select from lists or type/edit the time directly in the text input. Added auto-formatting and normalization on blur.
   - Added real-time frontend and backend validation for multi-day appointments, requiring a duration of at least 2 days and displaying a custom warning hint in case of an invalid value.
 
 ## [2026-07-12 16:29]

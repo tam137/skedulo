@@ -45,21 +45,6 @@ if (dateInput) {
     });
 }
 
-let fpTime;
-const startTimeInput = document.getElementById('start_time');
-if (startTimeInput) {
-    fpTime = flatpickr(startTimeInput, {
-        locale: "de",
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        minuteIncrement: 15,
-        defaultDate: "08:00",
-        disableMobile: true
-    });
-}
-
 export function loadAppointments() {
     api.fetchAppointments()
         .then(data => {
@@ -159,7 +144,8 @@ export function openCreateModal() {
     const durationDaysInput = document.getElementById('duration_days');
     if (durationHoursInput) durationHoursInput.value = '';
     if (durationDaysInput) durationDaysInput.value = '';
-    if (fpTime) fpTime.setDate("08:00");
+    const startTimeInput = document.getElementById('start_time');
+    if (startTimeInput) startTimeInput.value = "08:00";
     const durationDaysError = document.getElementById('duration-days-error');
     if (durationDaysError) durationDaysError.style.display = 'none';
     toggleAppointmentTypeFields();
@@ -211,7 +197,8 @@ export function openEditModal(id) {
             
             if (durationHoursInput) durationHoursInput.value = '';
             if (durationDaysInput) durationDaysInput.value = '';
-            if (fpTime) fpTime.setDate("08:00");
+            const startTimeInput = document.getElementById('start_time');
+            if (startTimeInput) startTimeInput.value = "08:00";
             const durationDaysError = document.getElementById('duration-days-error');
             if (durationDaysError) durationDaysError.style.display = 'none';
 
@@ -220,7 +207,7 @@ export function openEditModal(id) {
                 const parts = apt.appointment_date.split(' ');
                 if (parts.length > 1) {
                     const timePart = parts[1].substring(0, 5); // HH:MM
-                    if (fpTime) fpTime.setDate(timePart);
+                    if (startTimeInput) startTimeInput.value = timePart;
                 }
                 if (durationHoursInput) durationHoursInput.value = apt.duration_hours || '';
             } else if (apt.duration_days && parseInt(apt.duration_days, 10) > 1) {
@@ -542,3 +529,122 @@ if (durationDaysInput) {
         }
     });
 }
+
+function initCustomTimePicker() {
+    const startTimeInput = document.getElementById('start_time');
+    const dropdown = document.getElementById('time-picker-dropdown');
+    if (!startTimeInput || !dropdown) return;
+
+    // Show/hide dropdown on focus/click
+    startTimeInput.addEventListener('focus', () => {
+        dropdown.classList.add('active');
+        highlightSelectedTime();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!startTimeInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('active');
+        }
+    });
+
+    // Handle hour selection
+    const hourCells = dropdown.querySelectorAll('.hour-cell');
+    hourCells.forEach(cell => {
+        cell.addEventListener('click', () => {
+            hourCells.forEach(c => c.classList.remove('selected'));
+            cell.classList.add('selected');
+            updateInputFromSelection();
+        });
+    });
+
+    // Handle minute selection
+    const minuteCells = dropdown.querySelectorAll('.minute-cell');
+    minuteCells.forEach(cell => {
+        cell.addEventListener('click', () => {
+            minuteCells.forEach(c => c.classList.remove('selected'));
+            cell.classList.add('selected');
+            updateInputFromSelection();
+            // Auto close after selecting minute
+            dropdown.classList.remove('active');
+        });
+    });
+
+    // Auto format typing / validation
+    startTimeInput.addEventListener('blur', () => {
+        formatTimeInput();
+    });
+
+    // Utility: Update input value HH:MM based on highlighted cells
+    function updateInputFromSelection() {
+        const selectedHourCell = dropdown.querySelector('.hour-cell.selected');
+        const selectedMinuteCell = dropdown.querySelector('.minute-cell.selected');
+        
+        const h = selectedHourCell ? selectedHourCell.dataset.value : '08';
+        const m = selectedMinuteCell ? selectedMinuteCell.dataset.value : '00';
+        
+        startTimeInput.value = `${h}:${m}`;
+        // Trigger input event so any parent validation is run
+        startTimeInput.dispatchEvent(new Event('input'));
+    }
+
+    // Utility: Highlight cells in dropdown matching input value
+    function highlightSelectedTime() {
+        const val = startTimeInput.value.trim();
+        const parts = val.split(':');
+        let h = '08';
+        let m = '00';
+        if (parts.length === 2) {
+            h = parts[0].padStart(2, '0');
+            m = parts[1].padEnd(2, '0').substring(0, 2);
+        }
+
+        // Highlight hour
+        hourCells.forEach(cell => {
+            if (cell.dataset.value === h) {
+                cell.classList.add('selected');
+                cell.scrollIntoView({ block: 'nearest' });
+            } else {
+                cell.classList.remove('selected');
+            }
+        });
+
+        // Highlight minute
+        minuteCells.forEach(cell => {
+            if (cell.dataset.value === m) {
+                cell.classList.add('selected');
+                cell.scrollIntoView({ block: 'nearest' });
+            } else {
+                cell.classList.remove('selected');
+            }
+        });
+    }
+
+    // Utility: Format and validate manually typed input value
+    function formatTimeInput() {
+        let val = startTimeInput.value.trim().replace(/[^0-9:]/g, '');
+        if (!val) {
+            startTimeInput.value = '08:00';
+            return;
+        }
+
+        // Handle HHMM (e.g. 1130 -> 11:30)
+        if (val.length === 4 && !val.includes(':')) {
+            val = val.substring(0, 2) + ':' + val.substring(2);
+        }
+        
+        const parts = val.split(':');
+        let h = parseInt(parts[0], 10);
+        let m = parts[1] ? parseInt(parts[1], 10) : 0;
+
+        if (isNaN(h) || h < 0 || h > 23) h = 8;
+        if (isNaN(m) || m < 0 || m > 59) m = 0;
+
+        const hStr = String(h).padStart(2, '0');
+        const mStr = String(m).padStart(2, '0');
+
+        startTimeInput.value = `${hStr}:${mStr}`;
+    }
+}
+
+// Initialize on page load
+initCustomTimePicker();

@@ -85,9 +85,7 @@ test.describe('Calendar & Appointments', () => {
 
     // Select time-based radio
     await page.check('input[name="appointment_type"][value="time_based"]');
-    await page.evaluate(() => {
-      document.getElementById('start_time')._flatpickr.setDate('14:30');
-    });
+    await page.fill('#start_time', '14:30');
     await page.fill('#duration_hours', '2.5');
 
     // Save

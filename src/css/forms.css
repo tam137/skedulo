@@ -84,3 +84,86 @@ select.form-input option {
         gap: 0;
     }
 }
+
+/* Custom Time Picker Dropdown */
+.time-picker-container {
+    position: relative;
+    width: 100%;
+}
+
+.time-dropdown-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 100;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 8px;
+    gap: 8px;
+    min-width: 150px;
+    height: 180px;
+    user-select: none;
+}
+
+.time-dropdown-panel.active {
+    display: flex;
+}
+
+.time-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+/* Custom scrollbars for time columns */
+.time-column::-webkit-scrollbar {
+    width: 4px;
+}
+.time-column::-webkit-scrollbar-track {
+    background: transparent;
+}
+.time-column::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+}
+
+.time-column-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    text-align: center;
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-secondary);
+}
+
+.time-cell {
+    padding: 6px 4px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.time-cell:hover {
+    background-color: var(--bg-body);
+}
+
+.time-cell.selected {
+    background-color: var(--accent-indigo);
+    color: #ffffff;
+    font-weight: 600;
+}
+
