@@ -1,5 +1,14 @@
 # Changelog
 
+## [2026-07-13 06:33]
+- Optimized layout spacing and label alignment on mobile screens:
+  - Reduced outer `.dashboard-container` padding on mobile (max-width: 768px) from 12px to 8px.
+  - Reduced dashboard card padding on mobile from 20px to 12px.
+  - Reduced table row padding on mobile from 16px 20px to 12px 10px.
+  - Stacked labels and values vertically (e.g. "Ort: Erfurt") on small screens (max-width: 480px) to prevent horizontal scrolling and increase readability.
+  - Reduced login card padding on mobile (max-width: 480px) from 40px to 20px and login wrapper padding from 20px to 12px.
+  - Reduced modal overlay padding on mobile from 20px to 8px and modal card padding on mobile from 20px to 16px.
+
 ## [2026-07-12 16:36]
 - Added 24h format and 15-minute increments for start times and validation for multi-day duration:
   - Replaced Flatpickr time picker with a custom HTML dropdown picker (two separate columns for hours and minutes in 15-minute increments), allowing the user to either select from lists or type/edit the time directly in the text input. Added auto-formatting and normalization on blur.

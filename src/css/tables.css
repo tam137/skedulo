@@ -94,6 +94,16 @@
         padding: 20px;
         border-radius: 16px;
     }
+
+    .modal-overlay {
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-card {
+        padding: 16px;
+    }
 }
 
 
