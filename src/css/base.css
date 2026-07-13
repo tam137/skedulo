@@ -266,15 +266,6 @@ h1 {
 /* Mobile responsive adaptations */
 
 @media (max-width: 768px) {
-    .dashboard-container {
-        padding: 8px;
-    }
-    
-    .dashboard-card {
-        padding: 12px;
-        border-radius: 16px;
-    }
-
     .appointments-table {
         min-width: auto;
     }

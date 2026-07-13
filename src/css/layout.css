@@ -346,3 +346,15 @@
     background-color: var(--error);
     box-shadow: 0 0 8px var(--error);
 }
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 8px;
+    }
+    
+    .dashboard-card {
+        padding: 12px;
+        border-radius: 16px;
+    }
+}
+

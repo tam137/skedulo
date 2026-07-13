@@ -393,3 +393,20 @@
 #edit-file-modal .modal-card {
     overflow: visible;
 }
+
+@media (max-width: 768px) {
+    .modal-overlay {
+        padding: 8px;
+    }
+    .modal-card {
+        padding: 20px;
+        border-radius: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-card {
+        padding: 16px;
+    }
+}
+

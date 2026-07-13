@@ -1,5 +1,10 @@
 # Changelog
 
+## [2026-07-13 08:55]
+- Fixed mobile CSS override issues for dashboard container and modals:
+  - Moved `.dashboard-container` and `.dashboard-card` mobile media query overrides from `base.css` to the end of `layout.css` to prevent them from being overridden by standard desktop styles in `layout.css`.
+  - Moved `.modal-overlay` and `.modal-card` mobile media query overrides from `tables.css` to the end of `modals.css` to prevent them from being overridden by standard desktop styles in `modals.css`.
+
 ## [2026-07-13 06:33]
 - Optimized layout spacing and label alignment on mobile screens:
   - Reduced outer `.dashboard-container` padding on mobile (max-width: 768px) from 12px to 8px.
