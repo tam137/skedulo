@@ -278,10 +278,8 @@ h1 {
         display: block;
     }
 
-    .appointments-table th {
-        display: none; 
-/* Hide header rows on mobile */
-
+    .appointments-table thead {
+        display: none;
     }
 
     .appointments-table tbody tr {
@@ -308,6 +306,17 @@ h1 {
         color: var(--text-secondary);
         display: inline-block;
         width: 100px;
+    }
+
+    .actions-flex-container {
+        justify-content: flex-start;
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .actions-flex-container .btn {
+        flex: 1 1 100%;
+        width: 100%;
     }
 }
 
@@ -371,6 +380,7 @@ h1 {
     display: flex;
     gap: 8px;
     justify-content: flex-end;
+    flex-wrap: wrap;
 }
 
 .action-icon-view {

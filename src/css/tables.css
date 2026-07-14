@@ -110,11 +110,10 @@
     font-weight: 500;
 }
 
-.cell-notes {
+.appointments-table td.cell-notes {
     max-width: 250px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: pre-wrap !important;
+    word-break: break-word;
 }
 
 .current-account-label {

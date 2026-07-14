@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026-07-14 12:30]
+- Resolved horizontal scrollbar issues and improved mobile layout responsiveness:
+  - Modified `.cell-notes` in `tables.css` to wrap dynamically using `white-space: pre-wrap` and `word-break: break-word` instead of truncating with ellipsis.
+  - Hidden the entire `thead` element on mobile viewports in `base.css` to prevent browser anonymous table layout overflow issues.
+  - Enabled flex-wrap on `.actions-flex-container` and forced `.btn` inside it to take 100% width on mobile viewports (<=768px), making user admin actions stack vertically and fit within narrow viewports.
+  - Added new E2E test suite `tests/e2e/responsive.spec.js` to assert table header hiding, notes wrapping, and admin button stacking on mobile viewports.
+
 ## [2026-07-13 08:55]
 - Fixed mobile CSS override issues for dashboard container and modals:
   - Moved `.dashboard-container` and `.dashboard-card` mobile media query overrides from `base.css` to the end of `layout.css` to prevent them from being overridden by standard desktop styles in `layout.css`.
