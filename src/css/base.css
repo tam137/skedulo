@@ -265,61 +265,6 @@ h1 {
 
 /* Mobile responsive adaptations */
 
-@media (max-width: 768px) {
-    .appointments-table {
-        min-width: auto;
-    }
-
-    .appointments-table, 
-    .appointments-table tbody, 
-    .appointments-table tr, 
-    .appointments-table td,
-    .appointments-table th {
-        display: block;
-    }
-
-    .appointments-table thead {
-        display: none;
-    }
-
-    .appointments-table tbody tr {
-        border-bottom: 1px solid var(--border-color);
-        padding: 12px 10px;
-        position: relative;
-    }
-    
-    .appointments-table tbody tr:last-child {
-        border-bottom: none;
-    }
-
-    .appointments-table td {
-        border-bottom: none;
-        padding: 4px 0;
-        font-size: 0.9rem;
-        max-width: none !important;
-        white-space: normal !important;
-    }
-
-    .appointments-table td::before {
-        content: attr(data-label) ": ";
-        font-weight: 600;
-        color: var(--text-secondary);
-        display: inline-block;
-        width: 100px;
-    }
-
-    .actions-flex-container {
-        justify-content: flex-start;
-        width: 100%;
-        margin-top: 8px;
-    }
-
-    .actions-flex-container .btn {
-        flex: 1 1 100%;
-        width: 100%;
-    }
-}
-
 @media (max-width: 480px) {
     .card {
         padding: 20px;
@@ -327,12 +272,6 @@ h1 {
     
     .login-wrapper {
         padding: 12px;
-    }
-
-    .appointments-table td::before {
-        display: block;
-        width: auto;
-        margin-bottom: 2px;
     }
 }
 /* Helper / Utility Classes */

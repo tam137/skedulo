@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026-07-14 13:07]
+- Refactored responsive table styling to eliminate all `!important` overrides:
+  - Moved table-specific mobile media queries from `base.css` to the end of `tables.css` to leverage CSS cascade loading order.
+  - Removed all `!important` declarations from responsive styles for table cells and column wrapper definitions.
+  - Added specific `.appointments-table td.cell-notes { max-width: none; }` override on mobile viewports to prevent desktop max-width constraints.
+
 ## [2026-07-14 12:30]
 - Resolved horizontal scrollbar issues and improved mobile layout responsiveness:
   - Modified `.cell-notes` in `tables.css` to wrap dynamically using `white-space: pre-wrap` and `word-break: break-word` instead of truncating with ellipsis.

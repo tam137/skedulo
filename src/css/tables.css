@@ -112,7 +112,7 @@
 
 .appointments-table td.cell-notes {
     max-width: 250px;
-    white-space: pre-wrap !important;
+    white-space: pre-wrap;
     word-break: break-word;
 }
 
@@ -120,4 +120,72 @@
     font-size: 0.85rem;
     color: var(--text-secondary);
     font-style: italic;
+}
+
+/* Mobile responsive adaptations for tables */
+@media (max-width: 768px) {
+    .appointments-table {
+        min-width: auto;
+    }
+
+    .appointments-table, 
+    .appointments-table tbody, 
+    .appointments-table tr, 
+    .appointments-table td,
+    .appointments-table th {
+        display: block;
+    }
+
+    .appointments-table thead {
+        display: none;
+    }
+
+    .appointments-table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        padding: 12px 10px;
+        position: relative;
+    }
+    
+    .appointments-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .appointments-table td {
+        border-bottom: none;
+        padding: 4px 0;
+        font-size: 0.9rem;
+        max-width: none;
+        white-space: normal;
+    }
+
+    .appointments-table td.cell-notes {
+        max-width: none;
+    }
+
+    .appointments-table td::before {
+        content: attr(data-label) ": ";
+        font-weight: 600;
+        color: var(--text-secondary);
+        display: inline-block;
+        width: 100px;
+    }
+
+    .actions-flex-container {
+        justify-content: flex-start;
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .actions-flex-container .btn {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .appointments-table td::before {
+        display: block;
+        width: auto;
+        margin-bottom: 2px;
+    }
 }
