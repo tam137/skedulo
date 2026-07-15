@@ -25,7 +25,7 @@ test.describe('Authentication & Session Management', () => {
     await page.waitForSelector('#appointment-sharing-select .multiselect-trigger');
     
     await page.click('#hamburger-btn');
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
     await expect(page.locator('#sidebar-drawer h2')).toContainText('Hallo, user_a!');
   });
 
@@ -38,7 +38,7 @@ test.describe('Authentication & Session Management', () => {
     await page.waitForSelector('#appointment-sharing-select .multiselect-trigger');
     
     await page.click('#hamburger-btn');
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
     await expect(page.locator('#nav-admin')).toBeVisible();
   });
 
@@ -66,7 +66,7 @@ test.describe('Authentication & Session Management', () => {
     await page.waitForSelector('#appointment-sharing-select .multiselect-trigger');
 
     await page.click('#hamburger-btn');
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
     await page.click('.logout-btn');
 
     await expect(page).toHaveURL(/.*login\.php.*/);
