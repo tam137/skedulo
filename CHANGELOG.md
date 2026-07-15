@@ -6,7 +6,7 @@
   - Added database isolation by setting up 4 separate PostgreSQL databases (`skedulo_0` to `skedulo_3`) in `run-tests.sh`.
   - Modified `auth_helper.php` to dynamically connect to the corresponding test database based on `x-test-worker-index` header sent by Playwright.
   - Optimized `run-tests.sh` to build the PHP Docker image only if it doesn't exist locally, avoiding redundant builds.
-  - Replaced all 20 occurrences of static `waitForTimeout(400)` calls with Playwright's native auto-waiting mechanisms.
+  - Adjusted all 20 occurrences of static `waitForTimeout(400)` calls to `waitForTimeout(300)` to optimize sidebar drawer transition waiting times without causing viewport click failures.
 
 ## [2026-07-15 14:57]
 - Added user activity history popup in the admin panel:

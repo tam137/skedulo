@@ -13,6 +13,7 @@ test.describe('File Manager & Uploads', () => {
 
     // Navigate to files tab
     await page.click('#hamburger-btn');
+    await page.waitForTimeout(300);
     await page.click('#nav-files');
     await expect(page.locator('#files-view')).not.toHaveClass(/hidden/);
   });
@@ -65,6 +66,7 @@ test.describe('File Manager & Uploads', () => {
   test('should associate a global file with an appointment and then unlink it', async ({ page }) => {
     // Navigate back to dashboard first to create an appointment
     await page.click('#hamburger-btn');
+    await page.waitForTimeout(300);
     await page.click('#nav-calendar');
     await expect(page.locator('#calendar-view')).not.toHaveClass(/hidden/);
 
@@ -79,6 +81,7 @@ test.describe('File Manager & Uploads', () => {
 
     // Navigate to files tab
     await page.click('#hamburger-btn');
+    await page.waitForTimeout(300);
     await page.click('#nav-files');
     await expect(page.locator('#files-view')).not.toHaveClass(/hidden/);
 
@@ -134,6 +137,7 @@ test.describe('File Manager & Uploads', () => {
     await pageA.waitForSelector('#appointment-sharing-select .multiselect-trigger');
 
     await pageA.click('#hamburger-btn');
+    await pageA.waitForTimeout(300);
     await pageA.click('#nav-files');
     await expect(pageA.locator('#files-view')).not.toHaveClass(/hidden/);
 
@@ -160,6 +164,7 @@ test.describe('File Manager & Uploads', () => {
     await pageB.waitForSelector('#appointment-sharing-select .multiselect-trigger');
 
     await pageB.click('#hamburger-btn');
+    await pageB.waitForTimeout(300);
     await pageB.click('#nav-files');
     await expect(pageB.locator('#files-view')).not.toHaveClass(/hidden/);
 

@@ -18,6 +18,7 @@ test.describe('Admin Operations & Password Change', () => {
 
     // Sidebar should NOT show Admin navigation link
     await page.click('#hamburger-btn');
+    await page.waitForTimeout(300);
     await expect(page.locator('#nav-admin')).not.toBeVisible();
 
     // Check direct API access
@@ -38,6 +39,7 @@ test.describe('Admin Operations & Password Change', () => {
 
     // Navigate to admin area
     await page.click('#hamburger-btn');
+    await page.waitForTimeout(300);
     await page.click('#nav-admin');
     await expect(page.locator('#admin-view')).not.toHaveClass(/hidden/);
 
@@ -74,6 +76,7 @@ test.describe('Admin Operations & Password Change', () => {
     await page.click('#btn-login');
     await page.waitForSelector('#appointment-sharing-select .multiselect-trigger');
     await page.click('#hamburger-btn');
+    await page.waitForTimeout(300);
     await page.click('#nav-admin');
     await page.click('#add-user-btn');
     const pwdUsername = `pwdu_${Date.now()}`;
@@ -82,6 +85,7 @@ test.describe('Admin Operations & Password Change', () => {
     
     // Log out admin
     await page.click('#hamburger-btn');
+    await page.waitForTimeout(300);
     await page.click('.logout-btn');
     await expect(page).toHaveURL(/.*login\.php.*/);
 
@@ -94,6 +98,7 @@ test.describe('Admin Operations & Password Change', () => {
 
     // Go to change password modal
     await page.click('#hamburger-btn');
+    await page.waitForTimeout(300);
     await page.click('#change-pwd-btn');
     await expect(page.locator('#change-password-modal')).toHaveClass(/active/);
 
@@ -155,6 +160,7 @@ test.describe('Admin Operations & Password Change', () => {
 
     // Go to admin view
     await pageAdmin.click('#hamburger-btn');
+    await pageAdmin.waitForTimeout(300);
     await pageAdmin.click('#nav-admin');
     await expect(pageAdmin.locator('#admin-view')).not.toHaveClass(/hidden/);
 
@@ -181,6 +187,7 @@ test.describe('Admin Operations & Password Change', () => {
 
     // Go to admin view
     await page.click('#hamburger-btn');
+    await page.waitForTimeout(300);
     await page.click('#nav-admin');
     await expect(page.locator('#admin-view')).not.toHaveClass(/hidden/);
 
@@ -240,6 +247,7 @@ test.describe('Admin Operations & Password Change', () => {
 
     // Go to admin view
     await pageAdmin.click('#hamburger-btn');
+    await pageAdmin.waitForTimeout(300);
     await pageAdmin.click('#nav-admin');
     await expect(pageAdmin.locator('#admin-view')).not.toHaveClass(/hidden/);
 
