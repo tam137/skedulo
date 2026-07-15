@@ -215,4 +215,59 @@ test.describe('Admin Operations & Password Change', () => {
     await page.click('#close-user-history-modal-btn');
     await expect(historyModal).not.toHaveClass(/active/);
   });
+
+  test('should not leak private appointment history to admin if not shared', async ({ browser }) => {
+    // 1. Log in as user_a (standard user) and create a private appointment
+    const contextUser = await browser.newContext();
+    const pageUser = await contextUser.newPage();
+    await pageUser.goto('/login.php');
+    await pageUser.fill('#username', 'user_a');
+    await pageUser.fill('#password', 'Start123!');
+    await pageUser.click('#btn-login');
+    await pageUser.waitForSelector('#appointment-sharing-select .multiselect-trigger');
+
+    await pageUser.click('#add-appointment-btn');
+    const privateTitle = `Secret Admin Hidden Appt ${Date.now()}`;
+    await pageUser.fill('#title', privateTitle);
+    await pageUser.fill('#notes', 'This is a private note');
+    await pageUser.click('#save-btn');
+    // Wait for the modal to close and row to appear
+    await expect(pageUser.locator('#appointment-modal')).not.toHaveClass(/active/);
+    await expect(pageUser.locator('#upcoming-tbody tr', { hasText: privateTitle })).toBeVisible();
+    await contextUser.close();
+
+    // 2. Log in as admin and verify we cannot see this appointment's history
+    const contextAdmin = await browser.newContext();
+    const pageAdmin = await contextAdmin.newPage();
+    await pageAdmin.goto('/login.php');
+    await pageAdmin.fill('#username', 'admin_test');
+    await pageAdmin.fill('#password', 'Start123!');
+    await pageAdmin.click('#btn-login');
+    await pageAdmin.waitForSelector('#appointment-sharing-select .multiselect-trigger');
+
+    // Go to admin view
+    await pageAdmin.click('#hamburger-btn');
+    await pageAdmin.waitForTimeout(400);
+    await pageAdmin.click('#nav-admin');
+    await expect(pageAdmin.locator('#admin-view')).not.toHaveClass(/hidden/);
+
+    // Get the user row for user_a in users-tbody
+    const userRow = pageAdmin.locator('#users-tbody tr', { hasText: 'user_a' });
+    await expect(userRow).toBeVisible();
+
+    // Click the Verlauf button
+    await userRow.locator('.action-btn-history').click();
+
+    // Verify user history modal is open and active
+    const historyModal = pageAdmin.locator('#user-history-modal');
+    await expect(historyModal).toHaveClass(/active/);
+
+    // Assert that the private title is NOT present in the history details
+    const modalContent = pageAdmin.locator('#user-history-content');
+    await expect(modalContent).not.toContainText(privateTitle);
+
+    // Close the history modal
+    await pageAdmin.click('#close-user-history-modal-btn');
+    await contextAdmin.close();
+  });
 });

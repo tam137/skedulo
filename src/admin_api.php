@@ -61,24 +61,41 @@ try {
             exit;
         }
 
-        // Fetch last 10 changes (including creations)
+        // Fetch last 10 changes (including creations) where the current admin has permission
         $stmt = $pdo->prepare("
             (
                 SELECT h.id, h.changed_at, h.changes, a.title AS appointment_title, a.id AS appointment_id, FALSE as is_creation
                 FROM appointment_history h
                 JOIN appointments a ON h.appointment_id = a.id
                 WHERE h.changed_by = :userId
+                  AND (
+                      a.created_by = :adminId
+                      OR EXISTS (
+                          SELECT 1 FROM appointment_permissions ap
+                          WHERE ap.appointment_id = a.id AND ap.account_id = :adminId
+                      )
+                  )
             )
             UNION ALL
             (
                 SELECT a.id, a.created_at as changed_at, CAST(NULL AS jsonb) as changes, a.title AS appointment_title, a.id AS appointment_id, TRUE as is_creation
                 FROM appointments a
                 WHERE a.created_by = :userId
+                  AND (
+                      a.created_by = :adminId
+                      OR EXISTS (
+                          SELECT 1 FROM appointment_permissions ap
+                          WHERE ap.appointment_id = a.id AND ap.account_id = :adminId
+                      )
+                  )
             )
             ORDER BY changed_at DESC
             LIMIT 10
         ");
-        $stmt->execute(['userId' => $id]);
+        $stmt->execute([
+            'userId' => $id,
+            'adminId' => $currentUser['id']
+        ]);
         $history = $stmt->fetchAll();
 
         // Decode JSON changes and convert flags

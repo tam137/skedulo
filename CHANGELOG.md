@@ -3,12 +3,13 @@
 ## [2026-07-15 14:57]
 - Added user activity history popup in the admin panel:
   - Added new backend action `user_history` in `admin_api.php` querying the last 10 changes (unifying `appointment_history` updates and `appointments` creations) made by a user.
+  - Restricted the query in `admin_api.php` to enforce security boundaries so admins can only see changes of appointments they are authorized to view (created by them or shared with them).
   - Added a new custom CSS class `.user-history-list` inside `modals.css` for managing popup content scrolling.
   - Added the user history modal HTML overlay to `dashboard.php`.
   - Moved and exported the `formatChanges` helper function from `appointments.js` into `utils.js` to share it with `admin.js`, enhancing it to support formatting of file additions and deletions.
   - Added "Verlauf" buttons next to actions for all user rows (including the current user) in `admin.js`.
   - Implemented event handlers in `admin.js` to fetch a user's history and open/close the user history modal.
-  - Updated responsive mobile check tests in `responsive.spec.js` to assert the 3 stacking admin action buttons, and added E2E tests in `admin.spec.js` for the new "Verlauf" history feature.
+  - Updated responsive mobile check tests in `responsive.spec.js` to assert the 3 stacking admin action buttons, and added E2E tests in `admin.spec.js` for the new "Verlauf" history feature and its security boundaries.
 
 ## [2026-07-15 10:25]
 - Updated developer guidelines in AGENTS.md:
