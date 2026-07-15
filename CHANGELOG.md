@@ -1,5 +1,10 @@
 # Changelog
 
+## [2026-07-15 10:25]
+- Updated developer guidelines in AGENTS.md:
+  - Added strict mobile responsiveness verification check to change workflow.
+  - Specified mobile viewport layouts must always be respected and tested.
+
 ## [2026-07-14 13:07]
 - Refactored responsive table styling to eliminate all `!important` overrides:
   - Moved table-specific mobile media queries from `base.css` to the end of `tables.css` to leverage CSS cascade loading order.
