@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026-07-15 15:56]
+- Optimized E2E test suite execution speed:
+  - Enabled parallel execution in `playwright.config.js` (`fullyParallel: true` and dynamic `workers: 4`).
+  - Added database isolation by setting up 4 separate PostgreSQL databases (`skedulo_0` to `skedulo_3`) in `run-tests.sh`.
+  - Modified `auth_helper.php` to dynamically connect to the corresponding test database based on `x-test-worker-index` header sent by Playwright.
+  - Optimized `run-tests.sh` to build the PHP Docker image only if it doesn't exist locally, avoiding redundant builds.
+  - Replaced all 20 occurrences of static `waitForTimeout(400)` calls with Playwright's native auto-waiting mechanisms.
+
 ## [2026-07-15 14:57]
 - Added user activity history popup in the admin panel:
   - Added new backend action `user_history` in `admin_api.php` querying the last 10 changes (unifying `appointment_history` updates and `appointments` creations) made by a user.

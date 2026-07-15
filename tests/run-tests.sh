@@ -32,9 +32,16 @@ until docker exec "$CONTAINER_NAME" pg_isready -U tam137 -d skedulo >/dev/null 2
 done
 echo " PostgreSQL is ready."
 
-# Initialize / Reset database schema & seed data
-echo "Initializing/Resetting database schema..."
-docker exec -i "$CONTAINER_NAME" psql -U tam137 -d skedulo < tests/setup-test-db.sql
+# Initialize / Reset database schema & seed data for workers
+NUM_WORKERS=4
+echo "Initializing/Resetting database schema for $NUM_WORKERS workers..."
+for i in $(seq 0 $((NUM_WORKERS - 1))); do
+    DB_NAME="skedulo_$i"
+    echo "Setting up database $DB_NAME..."
+    docker exec -i "$CONTAINER_NAME" psql -U tam137 -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME;" >/dev/null
+    docker exec -i "$CONTAINER_NAME" psql -U tam137 -d postgres -c "CREATE DATABASE $DB_NAME;" >/dev/null
+    docker exec -i "$CONTAINER_NAME" psql -U tam137 -d "$DB_NAME" < tests/setup-test-db.sql >/dev/null
+done
 
 # Start PHP Built-in server inside Docker
 echo "=== Building & Starting PHP Test Container ==="
@@ -49,8 +56,13 @@ fi
 # Remove existing container if it exists
 docker rm -f skedulo-php-test-server >/dev/null 2>&1 || true
 
-# Build PHP image
-docker build -t skedulo-php-test -f tests/Dockerfile.test .
+# Build PHP image only if it doesn't exist
+if [ -z "$(docker images -q skedulo-php-test 2>/dev/null)" ]; then
+    echo "Building PHP test image..."
+    docker build -t skedulo-php-test -f tests/Dockerfile.test .
+else
+    echo "PHP test image already exists, skipping build."
+fi
 
 # Run PHP container on host network
 docker run --name skedulo-php-test-server \

@@ -25,7 +25,12 @@ require_once __DIR__ . '/../config.php';
 function get_db_connection() {
     global $db_config;
     try {
-        $dsn = "pgsql:host=" . $db_config['host'] . ";port=" . $db_config['port'] . ";dbname=" . $db_config['dbname'];
+        $dbname = $db_config['dbname'];
+        if (isset($_SERVER['HTTP_X_TEST_WORKER_INDEX'])) {
+            $worker = preg_replace('/[^0-9]/', '', $_SERVER['HTTP_X_TEST_WORKER_INDEX']);
+            $dbname .= '_' . $worker;
+        }
+        $dsn = "pgsql:host=" . $db_config['host'] . ";port=" . $db_config['port'] . ";dbname=" . $dbname;
         $pdo = new PDO($dsn, $db_config['user'], $db_config['password'], [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC

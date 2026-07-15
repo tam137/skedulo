@@ -37,7 +37,6 @@ test.describe('Responsive & Mobile Layout Checks', () => {
 
     // 4. Navigate to admin page and verify buttons stack on mobile
     await page.click('#hamburger-btn');
-    await page.waitForTimeout(400);
     await page.click('#nav-admin');
     await expect(page.locator('#admin-view')).not.toHaveClass(/hidden/);
 
@@ -68,7 +67,6 @@ test.describe('Responsive & Mobile Layout Checks', () => {
 
     // Clean up appointment
     await page.click('#hamburger-btn');
-    await page.waitForTimeout(400);
     await page.click('#nav-calendar');
     const rowToDelete = page.locator('#upcoming-tbody tr', { hasText: 'Responsive Layout Test' });
     await rowToDelete.click();

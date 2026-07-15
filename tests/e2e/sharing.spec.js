@@ -38,7 +38,6 @@ test.describe('Sharing & Permissions', () => {
 
     // Log out user_a
     await page.click('#hamburger-btn');
-    await page.waitForTimeout(400);
     await page.click('.logout-btn');
     await expect(page).toHaveURL(/.*login\.php.*/);
 
@@ -94,7 +93,6 @@ test.describe('Sharing & Permissions', () => {
 
     // Go to files, upload a file and share with user_b
     await pageA.click('#hamburger-btn');
-    await pageA.waitForTimeout(400);
     await pageA.click('#nav-files');
 
     await pageA.click('#upload-global-file-btn');
