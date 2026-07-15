@@ -394,6 +394,11 @@
     overflow: visible;
 }
 
+.user-history-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
 @media (max-width: 768px) {
     .modal-overlay {
         padding: 8px;

@@ -116,3 +116,8 @@ export function createAdminUser(formData) {
     })
     .then(res => res.json());
 }
+
+export function fetchUserHistory(id) {
+    return fetch(`admin_api.php?action=user_history&id=${id}`)
+        .then(res => res.json());
+}

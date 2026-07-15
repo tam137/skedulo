@@ -1,6 +1,6 @@
 import { state } from '../state.js';
 import * as api from '../api.js';
-import { formatAppointmentDate, formatDateOnly, formatDateSimple, escapeHtml } from '../utils.js';
+import { formatAppointmentDate, formatDateOnly, formatDateSimple, escapeHtml, formatChanges } from '../utils.js';
 import { renderAppointmentFiles } from './files.js';
 
 const appointmentModal = document.getElementById('appointment-modal');
@@ -282,40 +282,7 @@ export function openEditModal(id) {
         });
 }
 
-function formatChanges(changes) {
-    const labels = {
-        title: 'Name',
-        location: 'Ort',
-        appointment_date: 'Datum',
-        notes: 'Notizen',
-        icon: 'Symbol',
-        all_day: 'Ganztägig',
-        duration_hours: 'Dauer (Stunden)',
-        duration_days: 'Dauer (Tage)'
-    };
-    let html = '';
-    for (const field in changes) {
-        const fieldLabel = labels[field] || field;
-        let oldVal = changes[field]['old'] ?? 'Keine';
-        let newVal = changes[field]['new'] ?? 'Keine';
-        
-        if (field === 'appointment_date') {
-            oldVal = formatDateOnly(oldVal);
-            newVal = formatDateOnly(newVal);
-        } else if (field === 'all_day') {
-            oldVal = (oldVal === true || oldVal === 1 || oldVal === '1' || oldVal === 'true') ? 'Ja' : 'Nein';
-            newVal = (newVal === true || newVal === 1 || newVal === '1' || newVal === 'true') ? 'Ja' : 'Nein';
-        }
-        
-        html += `<div class="history-change-line">
-            <strong>${fieldLabel}:</strong> 
-            <span class="history-old-value">${escapeHtml(String(oldVal))}</span> 
-            <span class="change-arrow">➔</span> 
-            <span class="history-new-value">${escapeHtml(String(newVal))}</span>
-        </div>`;
-    }
-    return html;
-}
+// formatChanges is now imported from ../utils.js
 
 export function closeModal() {
     appointmentModal.classList.remove('active');

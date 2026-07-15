@@ -1,6 +1,6 @@
 import { state } from '../state.js';
 import * as api from '../api.js';
-import { formatDateSimple, escapeHtml } from '../utils.js';
+import { formatDateSimple, escapeHtml, formatChanges } from '../utils.js';
 
 const usersTbody = document.getElementById('users-tbody');
 const addUserBtn = document.getElementById('add-user-btn');
@@ -10,6 +10,10 @@ const cancelAddUserModalBtn = document.getElementById('cancel-add-user-modal-btn
 const addUserForm = document.getElementById('add-user-form');
 const addUserErrorAlert = document.getElementById('add-user-error-alert');
 const addUserErrorMessage = document.getElementById('add-user-error-message');
+
+const userHistoryModal = document.getElementById('user-history-modal');
+const closeUserHistoryModalBtn = document.getElementById('close-user-history-modal-btn');
+const closeUserHistoryModalBtn2 = document.getElementById('close-user-history-modal-btn2');
 
 export function loadUsersAdmin() {
     if (!usersTbody) return;
@@ -47,15 +51,20 @@ function renderUsersAdmin(users) {
 
         const isCurrentUser = parseInt(u.id, 10) === state.currentUserId;
         let actionsHtml = '';
+        const historyBtnHtml = `<button type="button" class="btn btn-cancel btn-sm action-btn-history" data-id="${u.id}">Verlauf</button>`;
         
         if (!isCurrentUser) {
             const toggleText = u.is_active ? 'Deaktivieren' : 'Aktivieren';
             actionsHtml = `
+                ${historyBtnHtml}
                 <button type="button" class="btn btn-cancel btn-sm action-btn-toggle-status" data-id="${u.id}" data-active="${u.is_active}">${toggleText}</button>
                 <button type="button" class="btn btn-cancel btn-sm action-btn-reset-pwd" data-id="${u.id}">Passwort zurücksetzen</button>
             `;
         } else {
-            actionsHtml = '<span class="current-account-label">Aktuelles Konto</span>';
+            actionsHtml = `
+                ${historyBtnHtml}
+                <span class="current-account-label">Aktuelles Konto</span>
+            `;
         }
 
         tr.innerHTML = `
@@ -85,6 +94,13 @@ function renderUsersAdmin(users) {
         btn.addEventListener('click', () => {
             const id = btn.getAttribute('data-id');
             promptResetPassword(id);
+        });
+    });
+
+    usersTbody.querySelectorAll('.action-btn-history').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            showUserHistory(id);
         });
     });
 }
@@ -193,3 +209,69 @@ document.addEventListener('view-changed', (e) => {
         loadUsersAdmin();
     }
 });
+
+function closeUserHistoryModal() {
+    if (userHistoryModal) {
+        userHistoryModal.classList.remove('active');
+    }
+}
+
+if (closeUserHistoryModalBtn) closeUserHistoryModalBtn.addEventListener('click', closeUserHistoryModal);
+if (closeUserHistoryModalBtn2) closeUserHistoryModalBtn2.addEventListener('click', closeUserHistoryModal);
+
+function showUserHistory(id) {
+    const userHistoryUsername = document.getElementById('user-history-username');
+    const userHistoryContent = document.getElementById('user-history-content');
+
+    if (!userHistoryModal || !userHistoryContent) return;
+
+    userHistoryUsername.textContent = 'Lade...';
+    userHistoryContent.innerHTML = '<div class="table-empty-message">Lade Verlauf...</div>';
+    userHistoryModal.classList.add('active');
+
+    api.fetchUserHistory(id)
+        .then(data => {
+            if (data && data.success) {
+                userHistoryUsername.textContent = data.username || '';
+                userHistoryContent.innerHTML = '';
+                
+                if (data.history && data.history.length > 0) {
+                    data.history.forEach(log => {
+                        const item = document.createElement('div');
+                        item.className = 'history-item';
+                        
+                        const timeStr = formatDateSimple(log.changed_at);
+                        const appointmentTitle = escapeHtml(log.appointment_title || 'Unbekannter Termin');
+                        
+                        let changesHtml = '';
+                        if (log.is_creation) {
+                            changesHtml = `<div class="history-change-line history-creation">Termin erstellt</div>`;
+                        } else {
+                            changesHtml = formatChanges(log.changes);
+                        }
+
+                        item.innerHTML = `
+                            <div class="history-meta">
+                                <span>${timeStr}</span>
+                                <span>Termin: <strong>${appointmentTitle}</strong></span>
+                            </div>
+                            <div class="history-changes">
+                                ${changesHtml}
+                            </div>
+                        `;
+                        userHistoryContent.appendChild(item);
+                    });
+                } else {
+                    userHistoryContent.innerHTML = '<div class="table-empty-message">Keine Änderungen vorhanden.</div>';
+                }
+            } else {
+                alert(data?.error || 'Fehler beim Laden des Verlaufs.');
+                userHistoryModal.classList.remove('active');
+            }
+        })
+        .catch(err => {
+            console.error('Error fetching user history:', err);
+            alert('Systemfehler beim Abrufen des Verlaufs.');
+            userHistoryModal.classList.remove('active');
+        });
+}

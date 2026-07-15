@@ -49,17 +49,21 @@ test.describe('Responsive & Mobile Layout Checks', () => {
 
     // Check that buttons stack vertically (top of button 2 is below bottom of button 1)
     const buttons = flexContainer.locator('.btn');
-    await expect(buttons).toHaveCount(2);
+    await expect(buttons).toHaveCount(3);
     const btn1 = buttons.nth(0);
     const btn2 = buttons.nth(1);
+    const btn3 = buttons.nth(2);
 
     const rect1 = await btn1.boundingBox();
     const rect2 = await btn2.boundingBox();
+    const rect3 = await btn3.boundingBox();
 
     expect(rect1).not.toBeNull();
     expect(rect2).not.toBeNull();
-    if (rect1 && rect2) {
+    expect(rect3).not.toBeNull();
+    if (rect1 && rect2 && rect3) {
       expect(rect2.y).toBeGreaterThanOrEqual(rect1.y + rect1.height);
+      expect(rect3.y).toBeGreaterThanOrEqual(rect2.y + rect2.height);
     }
 
     // Clean up appointment

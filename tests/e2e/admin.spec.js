@@ -176,4 +176,43 @@ test.describe('Admin Operations & Password Change', () => {
 
     await contextAdmin.close();
   });
+
+  test('should display user change history modal when clicking Verlauf', async ({ page }) => {
+    // 1. Log in as admin
+    await page.goto('/login.php');
+    await page.fill('#username', 'admin_test');
+    await page.fill('#password', 'Start123!');
+    await page.click('#btn-login');
+    await page.waitForSelector('#appointment-sharing-select .multiselect-trigger');
+
+    // Go to admin view
+    await page.click('#hamburger-btn');
+    await page.waitForTimeout(400);
+    await page.click('#nav-admin');
+    await expect(page.locator('#admin-view')).not.toHaveClass(/hidden/);
+
+    // Get the user row for admin_test in users-tbody
+    const userRow = page.locator('#users-tbody tr', { hasText: 'admin_test' });
+    await expect(userRow).toBeVisible();
+
+    // Click the Verlauf button
+    await userRow.locator('.action-btn-history').click();
+
+    // Verify user history modal is open and active
+    const historyModal = page.locator('#user-history-modal');
+    await expect(historyModal).toHaveClass(/active/);
+
+    // Verify modal title username is correct
+    await expect(page.locator('#user-history-username')).toHaveText('admin_test');
+
+    // Modal should load and show either "Keine Änderungen vorhanden." or list elements
+    const modalContent = page.locator('#user-history-content');
+    await expect(modalContent).toBeVisible();
+    const text = await modalContent.innerText();
+    expect(text.length).toBeGreaterThan(0);
+
+    // Close the history modal
+    await page.click('#close-user-history-modal-btn');
+    await expect(historyModal).not.toHaveClass(/active/);
+  });
 });

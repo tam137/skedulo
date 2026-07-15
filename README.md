@@ -46,3 +46,4 @@ Willkommen bei **Skedulo**! Diese Webanwendung bietet dir eine einfache und übe
 * **Benutzerverwaltung:** Admins haben Zugriff auf ein dediziertes Administrations-Panel.
 * **Nutzerkontrolle:** Erstelle neue Benutzer, deaktiviere bestehende oder setze Passwörter bei Bedarf auf den Standardwert zurück.
 * **Aktivitäts-Status:** Behalte den letzten Login aller Nutzer im Blick.
+* **Änderungsverlauf:** Rufe die letzten 10 Änderungen (inklusive Erstellungen) eines Benutzers über ein übersichtliches Popup direkt aus der Benutzerliste ab.

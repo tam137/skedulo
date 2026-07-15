@@ -67,4 +67,54 @@
         return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
     }
 
-export { formatAppointmentDate, formatDateOnly, formatDateSimple, escapeHtml, formatBytes };
+    function formatChanges(changes) {
+        const labels = {
+            title: 'Name',
+            location: 'Ort',
+            appointment_date: 'Datum',
+            notes: 'Notizen',
+            icon: 'Symbol',
+            all_day: 'Ganztägig',
+            duration_hours: 'Dauer (Stunden)',
+            duration_days: 'Dauer (Tage)'
+        };
+        let html = '';
+        for (const field in changes) {
+            if (field === 'file_added') {
+                const fileName = changes[field]['name'] ?? 'Unbekannt';
+                html += `<div class="history-change-line">
+                    <span class="history-new-value">Datei hinzugefügt: ${escapeHtml(String(fileName))}</span>
+                </div>`;
+                continue;
+            }
+            if (field === 'file_deleted') {
+                const fileName = changes[field]['name'] ?? 'Unbekannt';
+                html += `<div class="history-change-line">
+                    <span class="history-old-value">Datei entfernt: ${escapeHtml(String(fileName))}</span>
+                </div>`;
+                continue;
+            }
+
+            const fieldLabel = labels[field] || field;
+            let oldVal = changes[field]['old'] ?? 'Keine';
+            let newVal = changes[field]['new'] ?? 'Keine';
+            
+            if (field === 'appointment_date') {
+                oldVal = formatDateOnly(oldVal);
+                newVal = formatDateOnly(newVal);
+            } else if (field === 'all_day') {
+                oldVal = (oldVal === true || oldVal === 1 || oldVal === '1' || oldVal === 'true') ? 'Ja' : 'Nein';
+                newVal = (newVal === true || newVal === 1 || newVal === '1' || newVal === 'true') ? 'Ja' : 'Nein';
+            }
+            
+            html += `<div class="history-change-line">
+                <strong>${fieldLabel}:</strong> 
+                <span class="history-old-value">${escapeHtml(String(oldVal))}</span> 
+                <span class="change-arrow">➔</span> 
+                <span class="history-new-value">${escapeHtml(String(newVal))}</span>
+            </div>`;
+        }
+        return html;
+    }
+
+export { formatAppointmentDate, formatDateOnly, formatDateSimple, escapeHtml, formatBytes, formatChanges };

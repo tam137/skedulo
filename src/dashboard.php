@@ -745,6 +745,22 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
         </div>
     </div>
 
+    <!-- User History Modal -->
+    <div class="modal-overlay" id="user-history-modal">
+        <div class="modal-card modal-card-md">
+            <div class="modal-header">
+                <h3 class="modal-title">Änderungsverlauf von <span id="user-history-username"></span></h3>
+                <button class="close-btn" id="close-user-history-modal-btn">&times;</button>
+            </div>
+            <div class="history-content user-history-list" id="user-history-content">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="modal-footer modal-footer-compact">
+                <button type="button" class="btn-cancel" id="close-user-history-modal-btn2">Schließen</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Flatpickr Library -->
     <script src="js/vendor/flatpickr.js"></script>
     <script src="js/vendor/flatpickr-de.js"></script>
