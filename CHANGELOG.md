@@ -1,9 +1,10 @@
 # Changelog
 
-## [2026-07-19 15:20]
+## [2026-07-19 15:25]
 - Removed automated live deployment requirement for agents:
   - Updated developer guidelines in AGENTS.md to state that agents must not perform automated live deployments on the server.
   - Updated apache-php-deploy.md to specify that the deployment process is performed manually by the user via git pull.
+  - Created a new generic workflow setup-git-deployment.md to guide configuring Git-pull-based deployments on the server.
 
 ## [2026-07-15 15:56]
 - Optimized E2E test suite execution speed:
