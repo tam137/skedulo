@@ -1,5 +1,10 @@
 # Changelog
 
+## [2026-07-19 15:20]
+- Removed automated live deployment requirement for agents:
+  - Updated developer guidelines in AGENTS.md to state that agents must not perform automated live deployments on the server.
+  - Updated apache-php-deploy.md to specify that the deployment process is performed manually by the user via git pull.
+
 ## [2026-07-15 15:56]
 - Optimized E2E test suite execution speed:
   - Enabled parallel execution in `playwright.config.js` (`fullyParallel: true` and dynamic `workers: 4`).
