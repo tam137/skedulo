@@ -35,3 +35,11 @@ temp/
 agent-workflow
 deploy.sh
 todo.md
+
+# Agent Artifacts
+implementation_plan.md
+
+# Playwright Test Artifacts
+test-results/
+playwright-report/
+blob-report/
