@@ -92,7 +92,9 @@ function renderTable(appointments, tbodyId, loadingText, emptyText) {
         const iconPrefix = apt.icon ? apt.icon + ' ' : '';
         const titleEscaped = iconPrefix + escapeHtml(apt.title);
         const locationEscaped = escapeHtml(apt.location || '-');
-        const sharedWithEscaped = escapeHtml(apt.shared_with || '-');
+        const isCreator = parseInt(apt.created_by, 10) === state.currentUserId;
+        const displaySharedWith = isCreator ? (apt.shared_with || '-') : (apt.creator_name || '-');
+        const sharedWithEscaped = escapeHtml(displaySharedWith);
         const notesEscaped = escapeHtml(apt.notes || '-');
 
         const fileCount = parseInt(apt.file_count || 0, 10);

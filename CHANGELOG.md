@@ -1,5 +1,10 @@
 # Changelog
 
+## [2026-07-20 13:45]
+- Improved "Geteilt mit" column logic:
+  - Display the creator's username instead of the logged-in user's own username if the appointment was created by someone else and shared with the logged-in user.
+  - Keep showing the list of shared users if the logged-in user is the creator.
+  - Updated E2E test in `sharing.spec.js` to assert the creator's name instead of the recipient's name in this column.
 ## [2026-07-20 13:34]
 - Fixed ineffective JS cache busting for native ES module imports:
   - Added Apache `Cache-Control` headers for `.js` files via `src/.htaccess` to properly handle module caching.

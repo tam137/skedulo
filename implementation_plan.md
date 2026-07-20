@@ -1,21 +1,19 @@
-# Implementierungsplan: Cache-Busting für JavaScript via .htaccess
+# Implementierungsplan: Korrektur Spalte "Geteilt mit"
 
 ## Ziel
-Sicherstellen, dass Browser die nativen ES6-Modul-Importe (`appointments.js`, etc.) nicht dauerhaft cachen, sondern stets die aktuelle Version vom Server laden. Das löst den Fehler des vorherigen Cache-Busting-Versuchs, der aufgrund nativer ES-Module fehlschlug.
+Korrektur der Anzeige in der Spalte "Geteilt mit" in den Termin-Tabellen:
+- Wenn der angemeldete Benutzer **Ersteller** des Termins ist, soll in der Spalte "Geteilt mit" die Liste der Benutzer angezeigt werden, mit denen der Termin geteilt wurde (`shared_with`).
+- Wenn der angemeldete Benutzer **nicht** der Ersteller des Termins ist (sondern der Termin mit ihm geteilt wurde), soll in der Spalte der Name des Erstellers (`creator_name`) angezeigt werden.
 
 ## Geplante Änderungen
 
-1. **`src/.htaccess` erweitern:**
-   - Hinzufügen von Apache-Headern speziell für JavaScript-Dateien (`\.(js)$`).
-   - Setzen der HTTP-Header `Cache-Control "no-cache, must-revalidate"`.
-   - Dies zwingt den Browser dazu, vor der Verwendung des Caches kurz beim Server anzufragen (z. B. via ETags/Last-Modified), ob die Datei modifiziert wurde. Dadurch werden veraltete JS-Dateien aus dem Browser-Cache ignoriert, wenn sich der Code geändert hat.
+1. **`src/js/modules/appointments.js` anpassen:**
+   - In `renderTable()` die Variable `sharedWith` abhängig davon bestimmen, ob `parseInt(apt.created_by, 10) === state.currentUserId` ist.
+   - Wenn ja: `apt.shared_with || '-'`
+   - Wenn nein: `apt.creator_name || '-'`
 
-2. **`src/dashboard.php` bereinigen:**
-   - Entfernen des nun obsoleten PHP-basierten Cache-Busters (`?v=<?php echo filemtime(...); ?>`) in den Script-Tags für `flatpickr.js` und `main.js`.
-   - Dies hält den HTML-Quellcode sauber, da die `.htaccess` das Caching nun serverseitig und vor allem auch für dynamische ES6-Imports löst.
+2. **`tests/e2e/sharing.spec.js` anpassen:**
+   - Auf Zeile 55 den E2E-Test so anpassen, dass für den eingeloggten Empfänger `user_b` der Erstellername `user_a` in der Spalte "Geteilt mit" erwartet wird.
 
 3. **Dokumentation:**
-   - Eintragen der Änderungen in die `CHANGELOG.md` unter dem aktuellen Datum.
-
-## Tests & Verifizierung
-Da der Live-Server nicht von mir berührt wird, verifizieren wir den Syntax und die korrekte Struktur im lokalen Repository. Die Tests (`run-tests.sh`) werden ausgeführt, um sicherzustellen, dass die App weiterhin lokal fehlerfrei funktioniert.
+   - Changelog-Eintrag in `CHANGELOG.md` hinzufügen.
