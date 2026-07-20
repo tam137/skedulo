@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026-07-20 13:34]
+- Fixed ineffective JS cache busting for native ES module imports:
+  - Added Apache `Cache-Control` headers for `.js` files via `src/.htaccess` to properly handle module caching.
+  - Reverted the now obsolete PHP-based `filemtime` cache busters in `src/dashboard.php`.
 ## [2026-07-20 12:59]
 - Fixed a bug where users couldn't see the new "Geteilt mit" column due to browser caching:
   - Added PHP `filemtime` cache busting to JavaScript imports in `dashboard.php` to ensure users always receive the latest JS version.
