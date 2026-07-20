@@ -764,8 +764,8 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
     </div>
 
     <!-- Flatpickr Library -->
-    <script src="js/vendor/flatpickr.js"></script>
-    <script src="js/vendor/flatpickr-de.js"></script>
-    <script type="module" src="js/main.js"></script>
+    <script src="js/vendor/flatpickr.js?v=<?php echo filemtime('js/vendor/flatpickr.js'); ?>"></script>
+    <script src="js/vendor/flatpickr-de.js?v=<?php echo filemtime('js/vendor/flatpickr-de.js'); ?>"></script>
+    <script type="module" src="js/main.js?v=<?php echo filemtime('js/main.js'); ?>"></script>
 </body>
 </html>

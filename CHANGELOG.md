@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026-07-20 12:59]
+- Fixed a bug where users couldn't see the new "Geteilt mit" column due to browser caching:
+  - Added PHP `filemtime` cache busting to JavaScript imports in `dashboard.php` to ensure users always receive the latest JS version.
+
 ## [2026-07-20 11:24]
 - Added "Geteilt mit" (Shared with) column to the calendar overview tables:
   - Updated case 'list' in `appointments_api.php` to fetch a sorted, comma-separated list of usernames who have sharing permissions for each appointment using a Postgres `string_agg` subquery.
