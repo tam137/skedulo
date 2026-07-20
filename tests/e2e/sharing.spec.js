@@ -52,6 +52,7 @@ test.describe('Sharing & Permissions', () => {
     // Verify appointment is visible
     const sharedRow = page.locator('#upcoming-tbody tr', { hasText: 'Gemeinsames Grillfest' });
     await expect(sharedRow).toBeVisible();
+    await expect(sharedRow.locator('td:nth-child(4)')).toContainText('user_b');
 
     // Open edit modal
     await sharedRow.click();

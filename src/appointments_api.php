@@ -44,7 +44,11 @@ try {
             // Fetch upcoming appointments (next first: ASC)
             $stmt = $pdo->prepare("
                 SELECT a.*, acc.username as creator_name,
-                       (SELECT COUNT(*) FROM files f WHERE f.appointment_id = a.id) as file_count
+                       (SELECT COUNT(*) FROM files f WHERE f.appointment_id = a.id) as file_count,
+                       (SELECT string_agg(acc_shared.username, ', ' ORDER BY acc_shared.username ASC)
+                        FROM appointment_permissions ap
+                        JOIN accounts acc_shared ON ap.account_id = acc_shared.id
+                        WHERE ap.appointment_id = a.id) as shared_with
                 FROM appointments a
                 JOIN accounts acc ON a.created_by = acc.id
                 WHERE a.appointment_date >= :today
@@ -63,7 +67,11 @@ try {
             // Fetch past appointments (recent past first: DESC)
             $stmt = $pdo->prepare("
                 SELECT a.*, acc.username as creator_name,
-                       (SELECT COUNT(*) FROM files f WHERE f.appointment_id = a.id) as file_count
+                       (SELECT COUNT(*) FROM files f WHERE f.appointment_id = a.id) as file_count,
+                       (SELECT string_agg(acc_shared.username, ', ' ORDER BY acc_shared.username ASC)
+                        FROM appointment_permissions ap
+                        JOIN accounts acc_shared ON ap.account_id = acc_shared.id
+                        WHERE ap.appointment_id = a.id) as shared_with
                 FROM appointments a
                 JOIN accounts acc ON a.created_by = acc.id
                 WHERE a.appointment_date < :today

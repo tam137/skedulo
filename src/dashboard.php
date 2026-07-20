@@ -198,12 +198,13 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                             <th>Datum</th>
                             <th>Name</th>
                             <th>Ort</th>
+                            <th>Geteilt mit</th>
                             <th>Notizen</th>
                         </tr>
                     </thead>
                     <tbody id="upcoming-tbody">
                         <tr>
-                            <td colspan="4" class="table-empty-message">
+                            <td colspan="5" class="table-empty-message">
                                 Lade Termine...
                             </td>
                         </tr>
@@ -223,12 +224,13 @@ $first_char = strtoupper(substr($user['username'], 0, 1));
                                         <th>Datum</th>
                                         <th>Name</th>
                                         <th>Ort</th>
+                                        <th>Geteilt mit</th>
                                         <th>Notizen</th>
                                     </tr>
                                 </thead>
                                 <tbody id="past-tbody">
                                     <tr>
-                                        <td colspan="4" class="table-empty-message">
+                                        <td colspan="5" class="table-empty-message">
                                             Keine vergangenen Termine vorhanden.
                                         </td>
                                     </tr>

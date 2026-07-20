@@ -56,7 +56,7 @@ test.describe('Calendar & Appointments', () => {
     // Verify update
     const updatedRow = page.locator('#upcoming-tbody tr', { hasText: 'Projekt-Meeting' });
     await expect(updatedRow.locator('td:nth-child(3)')).toContainText('Home Office');
-    await expect(updatedRow.locator('td:nth-child(4)')).toContainText('Remote Besprechung.');
+    await expect(updatedRow.locator('td:nth-child(5)')).toContainText('Remote Besprechung.');
 
     // 3. Delete Appointment
     await updatedRow.click();

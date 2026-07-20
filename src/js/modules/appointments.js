@@ -77,7 +77,7 @@ function renderTable(appointments, tbodyId, loadingText, emptyText) {
 
     if (appointments.length === 0) {
         tbody.innerHTML = `<tr>
-            <td colspan="4" class="table-empty-message">
+            <td colspan="5" class="table-empty-message">
                 ${emptyText}
             </td>
         </tr>`;
@@ -92,6 +92,7 @@ function renderTable(appointments, tbodyId, loadingText, emptyText) {
         const iconPrefix = apt.icon ? apt.icon + ' ' : '';
         const titleEscaped = iconPrefix + escapeHtml(apt.title);
         const locationEscaped = escapeHtml(apt.location || '-');
+        const sharedWithEscaped = escapeHtml(apt.shared_with || '-');
         const notesEscaped = escapeHtml(apt.notes || '-');
 
         const fileCount = parseInt(apt.file_count || 0, 10);
@@ -101,6 +102,7 @@ function renderTable(appointments, tbodyId, loadingText, emptyText) {
             <td class="cell-date" data-label="Datum">${dateHtml}${fileIndicatorHtml}</td>
             <td class="cell-title" data-label="Name">${titleEscaped}</td>
             <td data-label="Ort">${locationEscaped}</td>
+            <td data-label="Geteilt mit">${sharedWithEscaped}</td>
             <td data-label="Notizen" class="cell-notes">${notesEscaped}</td>
         `;
 

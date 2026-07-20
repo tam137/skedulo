@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026-07-20 11:24]
+- Added "Geteilt mit" (Shared with) column to the calendar overview tables:
+  - Updated case 'list' in `appointments_api.php` to fetch a sorted, comma-separated list of usernames who have sharing permissions for each appointment using a Postgres `string_agg` subquery.
+  - Added the "Geteilt mit" column header and updated empty/loading state colspans in both upcoming and past appointments tables in `dashboard.php`.
+  - Updated `appointments.js` list rendering to output the "Geteilt mit" cell for each appointment row, and adjusted the empty state colspan.
+  - Updated E2E tests in `appointments.spec.js` to reference the shifted column index for Notes, and added an assertion in `sharing.spec.js` to verify that the "Geteilt mit" column correctly displays the shared username.
+
 ## [2026-07-19 15:25]
 - Removed automated live deployment requirement for agents:
   - Updated developer guidelines in AGENTS.md to state that agents must not perform automated live deployments on the server.

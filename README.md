@@ -30,6 +30,7 @@ Willkommen bei **Skedulo**! Diese Webanwendung bietet dir eine einfache und übe
 ### 🤝 Teilen & Freigabe von Terminen
 * **Zusammenarbeit:** Teile deine Termine mit anderen registrierten Nutzern, um ihnen Lese- & Schreibrechte zu erteilen.
 * **Ersteller-Schutz:** Nur der Ersteller eines Termins kann die Freigabeliste anpassen oder den Termin löschen. Personen, mit denen der Termin geteilt wurde, können den Termin inhaltlich bearbeiten (Notizen, Ort etc.), aber nicht löschen oder Freigaben bearbeiten.
+* **Transparenz auf der Übersicht:** Sieh direkt in der Kalendertabelle (Spalte "Geteilt mit"), mit welchen anderen Benutzern ein Termin geteilt wurde.
 
 ### 📁 Dateiverwaltung & Anhänge
 * **Terminspezifische Dateien:** Lade Dokumente, Bilder oder andere Dateien direkt in einen Termin hoch, damit du am Tag des Termins alles Wichtige sofort griffbereit hast.
